@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>566-568 New Brunswick Ave, Fords, NJ 08863 — CRE Underwriting</title>
+<style>
+/* ════════════════════════════════════════════════════════════════
+   Open Design Fusion: Trading Terminal × Warm Editorial
+   Anti-Slop Compliant — Zero cardinal sins, mobile-safe
+   ════════════════════════════════════════════════════════════════ */
+:root {
+  --bg: #0D0D0D; --surface: #141414; --surface2: #1A1A1A;
+  --border: #2A2A2A; --text: #FAF9F5; --sub: #B0AEA5; --muted: #87867F;
+  --accent: #C96442; --accent-dim: color-mix(in oklch, #C96442 30%, transparent);
+  --green: #00D4AA; --red: #FF4757; --amber: #FFB800;
+  --gold: #C9A96E; --blue: #4A7A9A; --purple: #8A6AAA;
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-body: 'Source Serif 4', 'Cormorant Garamond', Georgia, serif;
+  --font-mono: 'DM Mono', 'IBM Plex Mono', 'JetBrains Mono', monospace;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scrollbar-gutter: stable; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--font-body); line-height: 1.5;
+  min-height: 100dvh; overscroll-behavior: contain;
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 1100px; margin: auto; padding: 20px 16px 40px; }
+.header {
+  padding: 24px 0 16px; border-bottom: 1px solid var(--border);
+  margin-bottom: 20px; display: flex; justify-content: space-between;
+  align-items: flex-end; flex-wrap: wrap; gap: 12px;
+}
+.header h1 {
+  font-family: var(--font-mono); font-size: 15px; font-weight: 600;
+  color: var(--text); letter-spacing: 0.08em; text-transform: uppercase;
+}
+.header .price { font-family: var(--font-display); font-size: 28px; color: var(--gold); font-variant-numeric: tabular-nums; }
+.verdict-banner {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px; border: 2px solid var(--amber);
+  color: var(--amber); font-family: var(--font-mono);
+  font-size: 16px; letter-spacing: 0.1em; font-weight: 600;
+  margin: 16px 0;
+}
+p.verdict-banner.pursue { border-color: var(--green); color: var(--green); }
+.verdict-banner.pass { border-color: var(--red); color: var(--red); }
+.tagline {
+  font-family: var(--font-body); font-size: 15px; color: var(--sub);
+  margin-top: 8px; max-width: 650px; line-height: 1.6;
+}
+
+/* KPI Grid — 1px hairline technique */
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1px; background: var(--border); border: 1px solid var(--border);
+  border-radius: 6px; overflow: hidden; margin-bottom: 20px;
+}
+.kpi-cell {
+  background: linear-gradient(140deg, var(--surface), color-mix(in oklch, var(--surface2) 90%, transparent));
+  padding: 14px 16px;
+}
+.kpi-label {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em;
+  color: var(--muted); text-transform: uppercase;
+}
+.kpi-value {
+  font-family: var(--font-display); font-size: 24px; font-weight: 500;
+  font-variant-numeric: tabular-nums; margin-top: 4px;
+}
+.kpi-sub {
+  font-family: var(--font-mono); font-size: 10px; color: var(--sub); margin-top: 2px;
+}
+
+/* Tabs */
+.tabs {
+  display: flex; flex-wrap: wrap; gap: 1px;
+  border-bottom: 1px solid var(--border); margin-bottom: 20px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.tab-btn {
+  font-family: var(--font-mono); font-size: 16px; letter-spacing: 0.08em;
+  padding: 10px 14px; background: transparent; color: var(--sub);
+  border: none; border-bottom: 2px solid transparent;
+  cursor: pointer; text-transform: uppercase; white-space: nowrap;
+  touch-action: manipulation; min-height: 44px;
+}
+.tab-btn.active {
+  color: var(--accent); border-bottom: 2px solid var(--accent);
+  background: color-mix(in oklch, var(--accent) 5%, transparent);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.section-label {
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em;
+  color: var(--muted); text-transform: uppercase;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 16px;
+}
+
+/* Cards */
+.card {
+  background: linear-gradient(140deg, var(--surface), color-mix(in oklch, var(--surface2) 90%, transparent));
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 14px 16px; margin-bottom: 10px;
+}
+.card.worst { border-top: 2px solid var(--red); }
+.card.best { border-top: 2px solid var(--green); }
+.card.phase3 { border-top: 2px solid var(--purple); }
+.card-name { font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--text); letter-spacing: 0.06em; }
+.card-metrics { font-family: var(--font-mono); font-size: 11px; color: var(--sub); margin-top: 6px; display: flex; gap: 18px; flex-wrap: wrap; }
+.card-metrics span { font-variant-numeric: tabular-nums; }
+.card-desc { font-family: var(--font-body); font-size: 13px; color: var(--sub); margin-top: 6px; line-height: 1.6; }
+
+/* Flags */
+.flag { padding: 4px 10px; font-family: var(--font-mono); font-size: 11px; border-radius: 3px; display: inline-block; margin: 3px; }
+.flag-red { background: color-mix(in oklch, var(--red) 12%, transparent); color: var(--red); }
+.flag-amber { background: color-mix(in oklch, var(--amber) 12%, transparent); color: var(--amber); }
+.flag-green { background: color-mix(in oklch, var(--green) 12%, transparent); color: var(--green); }
+
+/* Moats bar chart */
+.moat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.moat-label { font-family: var(--font-mono); font-size: 10px; color: var(--sub); width: 170px; text-align: right; flex-shrink: 0; letter-spacing: 0.04em; }
+.moat-bar-bg { flex: 1; height: 10px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.moat-bar-fill { height: 100%; border-radius: 3px; }
+.moat-score { font-family: var(--font-display); font-size: 13px; color: var(--text); width: 28px; text-align: right; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.moat-rationale { font-family: var(--font-body); font-size: 12px; color: var(--sub); margin-left: 180px; margin-bottom: 10px; line-height: 1.5; }
+
+/* Offer grid */
+.offer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 10px; }
+.offer-cell { background: linear-gradient(140deg, var(--surface), color-mix(in oklch, var(--surface2) 90%, transparent)); padding: 14px 16px; text-align: center; }
+.offer-price { font-family: var(--font-display); font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.offer-metric { font-family: var(--font-mono); font-size: 11px; color: var(--sub); margin-top: 4px; letter-spacing: 0.04em; }
+.offer-best { border: 1px solid var(--green); background: color-mix(in oklch, var(--green) 5%, transparent); }
+
+/* Footer */
+.footer {
+  font-family: var(--font-mono); font-size: 9px; color: var(--muted);
+  text-align: center; padding: 24px 0 16px;
+  border-top: 1px solid var(--border); margin-top: 28px;
+  letter-spacing: 0.04em;
+}
+
+/* Econ row */
+.econ-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.econ-item {
+  background: linear-gradient(140deg, var(--surface), color-mix(in oklch, var(--surface2) 90%, transparent));
+  border: 1px solid var(--border); padding: 10px 14px; border-radius: 6px;
+  flex: 1; min-width: 120px;
+}
+.econ-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.econ-value { font-family: var(--font-display); font-size: 15px; color: var(--text); font-variant-numeric: tabular-nums; margin-top: 3px; }
+
+/* Comps table */
+.comp-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 11px; margin-bottom: 16px; }
+.comp-table th { color: var(--muted); text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); font-weight: 400; text-transform: uppercase; letter-spacing: 0.08em; }
+.comp-table td { color: var(--text); padding: 8px 10px; border-bottom: 1px solid color-mix(in oklch, var(--border) 50%, transparent); font-variant-numeric: tabular-nums; }
+
+/* Animations — reduced motion aware */
+@media (prefers-reduced-motion: no-preference) {
+  .moat-bar-fill { transition: width 600ms ease-out; }
+  .fade-in { animation: fadeIn 600ms ease-out; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .moat-label { width: 120px; font-size: 9px; }
+  .moat-rationale { margin-left: 130px; }
+  .offer-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 430px) {
+  .container { padding: 12px 8px; }
+  .header h1 { font-size: 13px; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .kpi-value { font-size: 20px; }
+  .tab-btn { font-size: 16px; padding: 8px 10px; }
+  .moat-label { width: 90px; font-size: 8px; }
+  .moat-rationale { margin-left: 98px; font-size: 11px; }
+  .comp-table { font-size: 9px; }
+  .comp-table th, .comp-table td { padding: 5px 6px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <div>
+    <div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:0.08em;">LISTING 34554176 · WOODBRIDGE TOWNSHIP · NJ</div>
+    <h1>566-568 New Brunswick Ave, Fords, NJ 08863</h1>
+    <div style="font-family:var(--font-body);font-size:13px;color:var(--sub);margin-top:4px;">Retail</div>
+  </div>
+  <div class="price">$799,000</div>
+</div>
+
+<div class="verdict-banner conditional">CONDITIONAL</div>
+<div class="tagline">Risk: $799,000, worst 66% of capital. Best MOIC 2.39x. Convexity 1.21 (MARGINAL). Conditional — requires price discipline.</div>
+
+<div class="kpi-grid">
+  <div class="kpi-cell"><div class="kpi-label">Convexity</div><div class="kpi-value" style="color:var(--amber)">1.21×</div><div class="kpi-sub">MARGINAL</div></div>
+  <div class="kpi-cell"><div class="kpi-label">PWEV vs Ask</div><div class="kpi-value" style="color:var(--red)">-2.8%</div><div class="kpi-sub">$776,566 PWEV</div></div>
+  <div class="kpi-cell"><div class="kpi-label">Hard Floor</div><div class="kpi-value" style="color:var(--blue)">$530,000</div><div class="kpi-sub">66% of ask</div></div>
+  <div class="kpi-cell"><div class="kpi-label">Worst Case</div><div class="kpi-value" style="color:var(--red)">66%</div><div class="kpi-sub">of capital</div></div>
+  <div class="kpi-cell"><div class="kpi-label">Best MOIC</div><div class="kpi-value" style="color:var(--green)">2.39×</div><div class="kpi-sub">5-year</div></div>
+  <div class="kpi-cell"><div class="kpi-label">Moats</div><div class="kpi-value" style="color:var(--blue)">15/24</div><div class="kpi-sub">NARROW MOAT</div></div>
+  <div class="kpi-cell"><div class="kpi-label">Offer Target</div><div class="kpi-value" style="color:var(--gold)">$715,500–874,500</div><div class="kpi-sub">Walk > $687,140</div></div>
+  <div class="kpi-cell"><div class="kpi-label">Risk/Reward</div><div class="kpi-value" style="color:var(--amber)">3.6</div><div class="kpi-sub"></div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('scenarios')">Scenarios</button>
+  <button class="tab-btn" onclick="showTab('valuation')">Valuation</button>
+  <button class="tab-btn" onclick="showTab('divergence')">Divergence</button>
+  <button class="tab-btn" onclick="showTab('moats')">Moats</button>
+  <button class="tab-btn" onclick="showTab('offers')">Offers</button>
+  <button class="tab-btn" onclick="showTab('risks')">Risks</button>
+  <button class="tab-btn" onclick="showTab('demographics')">Demographics</button>
+  <button class="tab-btn" onclick="showTab('environmental')">Environmental</button>
+  <button class="tab-btn" onclick="showTab('comps')">Comps</button>
+  <button class="tab-btn" onclick="showTab('recommendation')">Rec</button>
+</div>
+
+<div class="tab-content active" id="scenarios"><div class="section-label">5-Scenario Architecture</div>
+<div class="card worst">
+  <div class="card-name">1. WORST CASE</div>
+  <div class="card-metrics">
+    <span>Value <b style="color:var(--red)">$292,632</b></span>
+  </div>
+  <div class="card-desc">Worst-case scenario. Hard floor at $530,000 provides downside protection.</div>
+</div>
+<div class="card">
+  <div class="card-name">2. BASELINE</div>
+  <div class="card-metrics">
+    <span>Value <b>$0</b></span>
+  </div>
+  <div class="card-desc">Baseline — property operates as-is under new ownership.</div>
+</div>
+<div class="card best">
+  <div class="card-name">3. PHASE 1 OPTIMIZE</div>
+  <div class="card-metrics">
+    <span>Value <b style="color:var(--green)">$0</b></span>
+  </div>
+  <div class="card-desc">Phase 1 — low-capital operational improvements. Highest-probability value-add.</div>
+</div>
+<p style="font-family:var(--font-body);font-size:13px;color:var(--sub);margin-top:12px;">
+  Effective worst: $530,000 (max of operating worst and hard floor).
+  MARGINAL convexity ratio: 1.21×.
+</p></div>
+<div class="tab-content" id="valuation"><div class="section-label">4-Method Valuation Triangulation</div>
+<div class="kpi-grid">
+  <div class="kpi-cell"><div class="kpi-label">Asset-Based Floor</div><div class="kpi-value" style="color:var(--blue)">$530,000</div><div class="kpi-sub">Distressed liquidation</div></div>
+  <div class="kpi-cell"><div class="kpi-label">PWEV</div><div class="kpi-value" style="color:var(--purple)">$776,566</div><div class="kpi-sub">-2.8% vs ask</div></div>
+  <div class="kpi-cell"><div class="kpi-label">Ask Price</div><div class="kpi-value" style="color:var(--gold)">$799,000</div><div class="kpi-sub">Listing price</div></div>
+  <div class="kpi-cell"><div class="kpi-label">PWEV Premium</div><div class="kpi-value" style="color:var(--green)">+-22,434</div><div class="kpi-sub">Above ask</div></div>
+</div>
+<p style="font-family:var(--font-body);font-size:13px;color:var(--sub);margin-top:12px;">
+  PWEV of $776,566 is -2.8% vs ask — overvalued at listing price.
+</p></div>
+<div class="tab-content" id="divergence"><div class="section-label">Divergence & Effective Frontier</div>
+<div class="kpi-grid">
+  <div class="kpi-cell"><div class="kpi-label">Convexity Ratio</div><div class="kpi-value" style="color:var(--amber)">1.21×</div><div class="kpi-sub">MARGINAL</div></div>
+  <div class="kpi-cell"><div class="kpi-label">Absolute Spread</div><div class="kpi-value" style="color:var(--green)">$589,246</div><div class="kpi-sub">Best − Eff. Worst</div></div>
+  <div class="kpi-cell"><div class="kpi-label">Risk/Reward</div><div class="kpi-value" style="color:var(--green)">3.6</div><div class="kpi-sub">Best MOIC ÷ Worst %</div></div>
+  <div class="kpi-cell"><div class="kpi-label">Effective Worst</div><div class="kpi-value" style="color:var(--red)">$530,000</div><div class="kpi-sub">max(Op Worst, Floor)</div></div>
+  <div class="kpi-cell"><div class="kpi-label">Worst % Capital</div><div class="kpi-value" style="color:var(--red)">66%</div><div class="kpi-sub">Of $799,000</div></div>
+  <div class="kpi-cell"><div class="kpi-label">Best MOIC</div><div class="kpi-value" style="color:var(--green)">2.39×</div><div class="kpi-sub">5-year</div></div>
+  <div class="kpi-cell"><div class="kpi-label">Frontier Zone</div><div class="kpi-value" style="color:var(--amber)">Walk away</div><div class="kpi-sub">(66%, 2.39×)</div></div>
+  <div class="kpi-cell"><div class="kpi-label">PWEV</div><div class="kpi-value" style="color:var(--purple)">$776,566</div><div class="kpi-sub">-2.8% vs ask</div></div>
+</div></div>
+<div class="tab-content" id="moats"><div class="section-label">8-Moat Scoring · 15/24 · NARROW MOAT</div>
+<div class="moat-row">
+  <div class="moat-label">Scarce Transferable License</div>
+  <div class="moat-bar-bg"><div class="moat-bar-fill" style="width:0%;background:var(--red);"></div></div>
+  <div class="moat-score" style="color:var(--red)">0/3</div>
+</div>
+<div class="moat-rationale">No liquor license, special-use permit, or PILOT. No regulatory moat.</div><div class="moat-row">
+  <div class="moat-label">Tourism Corridor Position</div>
+  <div class="moat-bar-bg"><div class="moat-bar-fill" style="width:67%;background:var(--amber);"></div></div>
+  <div class="moat-score" style="color:var(--amber)">2/3</div>
+</div>
+<div class="moat-rationale">Primary commercial corridor with established retail traffic.</div><div class="moat-row">
+  <div class="moat-label">Multi-Revenue-Stream Parcel</div>
+  <div class="moat-bar-bg"><div class="moat-bar-fill" style="width:33%;background:var(--red);"></div></div>
+  <div class="moat-score" style="color:var(--red)">1/3</div>
+</div>
+<div class="moat-rationale">Single or unverified income stream. Limited diversification.</div><div class="moat-row">
+  <div class="moat-label">Zoning Optionality</div>
+  <div class="moat-bar-bg"><div class="moat-bar-fill" style="width:67%;background:var(--amber);"></div></div>
+  <div class="moat-score" style="color:var(--amber)">2/3</div>
+</div>
+<div class="moat-rationale">Commercial zoning (B-2 General Business) with some flexibility.</div><div class="moat-row">
+  <div class="moat-label">Rent-to-Market Gap</div>
+  <div class="moat-bar-bg"><div class="moat-bar-fill" style="width:67%;background:var(--amber);"></div></div>
+  <div class="moat-score" style="color:var(--amber)">2/3</div>
+</div>
+<div class="moat-rationale">Estimated rent $16.0/SF — verify with rent roll.</div><div class="moat-row">
+  <div class="moat-label">Brand Longevity & Goodwill</div>
+  <div class="moat-bar-bg"><div class="moat-bar-fill" style="width:67%;background:var(--amber);"></div></div>
+  <div class="moat-score" style="color:var(--amber)">2/3</div>
+</div>
+<div class="moat-rationale">Neighborhood businesses with local customer loyalty. Tenants are replaceable.</div><div class="moat-row">
+  <div class="moat-label">Asset Stack Coverage</div>
+  <div class="moat-bar-bg"><div class="moat-bar-fill" style="width:100%;background:var(--green);"></div></div>
+  <div class="moat-score" style="color:var(--green)">3/3</div>
+</div>
+<div class="moat-rationale">Hard floor $530,000 = 66% of ask. Strong downside protection.</div><div class="moat-row">
+  <div class="moat-label">Seller Asymmetry</div>
+  <div class="moat-bar-bg"><div class="moat-bar-fill" style="width:100%;background:var(--green);"></div></div>
+  <div class="moat-score" style="color:var(--green)">3/3</div>
+</div>
+<div class="moat-rationale">475 days + price reduction — extreme seller capitulation.</div>
+<div class="card" style="margin-top:16px;">
+  <div class="card-name">NARROW MOAT · 15/24. Strongest: Asset Stack Coverage, Seller Asymmetry. Weakest: Multi-Revenue-Stream Parcel, Scarce Transferable License.</div>
+</div></div>
+<div class="tab-content" id="offers"><div class="section-label">Offer Analysis · Price Ladder</div>
+<div class="offer-grid"><div class="offer-cell offer-best">
+  <div class="offer-price" style="color:var(--green)">$716,000</div>
+  <div class="offer-metric">$179/SF</div>
+  <div class="offer-metric">Cap 8.0%</div>
+  <div class="offer-metric">CoC 8.0%</div>
+  <div style="font-family:var(--font-mono);font-size:9px;color:var(--green);margin-top:4px;letter-spacing:0.06em;">AGGRESSIVE TARGET</div>
+</div><div class="offer-cell ">
+  <div class="offer-price" style="color:var(--text)">$795,000</div>
+  <div class="offer-metric">$199/SF</div>
+  <div class="offer-metric">Cap 7.2%</div>
+  <div class="offer-metric">CoC 7.2%</div>
+  <div style="font-family:var(--font-mono);font-size:9px;color:var(--text);margin-top:4px;letter-spacing:0.06em;"></div>
+</div><div class="offer-cell offer-best">
+  <div class="offer-price" style="color:var(--green)">$874,000</div>
+  <div class="offer-metric">$218/SF</div>
+  <div class="offer-metric">Cap 6.6%</div>
+  <div class="offer-metric">CoC 6.6%</div>
+  <div style="font-family:var(--font-mono);font-size:9px;color:var(--green);margin-top:4px;letter-spacing:0.06em;">TARGET MIDPOINT</div>
+</div><div class="offer-cell ">
+  <div class="offer-price" style="color:var(--amber)">$687,000</div>
+  <div class="offer-metric">$172/SF</div>
+  <div class="offer-metric">Cap 8.3%</div>
+  <div class="offer-metric">CoC 8.4%</div>
+  <div style="font-family:var(--font-mono);font-size:9px;color:var(--amber);margin-top:4px;letter-spacing:0.06em;">WALK AWAY</div>
+</div><div class="offer-cell ">
+  <div class="offer-price" style="color:var(--red)">$799,000</div>
+  <div class="offer-metric">$200/SF</div>
+  <div class="offer-metric">Cap 7.2%</div>
+  <div class="offer-metric">CoC 7.2%</div>
+  <div style="font-family:var(--font-mono);font-size:9px;color:var(--red);margin-top:4px;letter-spacing:0.06em;">ASK — NO VERIFIED FINANCIALS</div>
+</div></div>
+<p style="font-family:var(--font-body);font-size:13px;color:var(--sub);margin-top:12px;line-height:1.6;">
+  Anchor at hard floor ($530,000) + premium for stabilized income. At $715,500-874,500, cap rates 6.6-8.0%. Walk above $687,140.
+</p></div>
+<div class="tab-content" id="risks"><div class="section-label">Risks & Concealment</div>
+<div class="card">
+  <div class="card-name">Tax Bomb</div>
+  <div class="card-desc">NJ reassesses at sale price. Post-sale tax increase modeled in all scenarios.</div>
+</div>
+<div class="card">
+  <div class="card-name">Environmental</div>
+  <div class="card-desc">Flood risk: medium. UST risk: high. Phase I recommended: True.</div>
+</div>
+<div class="card">
+  <div class="card-name">Structural</div>
+  <div class="card-desc">Verify roof/HVAC condition, building code compliance, and any unpermitted work before offer.</div>
+</div></div>
+<div class="tab-content" id="demographics"><div class="section-label">Economic Profile</div>
+<div class="econ-row">
+  <div class="econ-item"><div class="econ-label">Population</div><div class="econ-value" style="color:var(--text)">863,000</div></div>
+  <div class="econ-item"><div class="econ-label">Pop Growth (5yr)</div><div class="econ-value" style="color:var(--text)">+2.1%</div></div>
+  <div class="econ-item"><div class="econ-label">Median Income</div><div class="econ-value" style="color:var(--text)">$98,500</div></div>
+  <div class="econ-item"><div class="econ-label">Poverty Rate</div><div class="econ-value" style="color:var(--text)">7.8%</div></div>
+  <div class="econ-item"><div class="econ-label">Bachelor's+</div><div class="econ-value" style="color:var(--text)">42%</div></div>
+</div>
+<div class="econ-row">
+  <div class="econ-item"><div class="econ-label">Employment</div><div class="econ-value" style="color:var(--text)">420,000</div></div>
+  <div class="econ-item"><div class="econ-label">Emp Growth (5yr)</div><div class="econ-value" style="color:var(--text)">+3.2%</div></div>
+  <div class="econ-item"><div class="econ-label">Unemployment</div><div class="econ-value" style="color:var(--text)">3.8%</div></div>
+  <div class="econ-item"><div class="econ-label">Median Home</div><div class="econ-value" style="color:var(--text)">$420,000</div></div>
+  <div class="econ-item"><div class="econ-label">Rental Vacancy</div><div class="econ-value" style="color:var(--text)">4.2%</div></div>
+</div>
+<div class="econ-item" style="margin-top:10px;">
+  <div class="econ-label">Top Employers</div>
+  <div style="font-family:var(--font-mono);font-size:11px;color:var(--text);margin-top:4px;">Rutgers, J&J, RWJ Hospital, BMS, Wakefern</div>
+</div>
+<p style="font-family:var(--font-body);font-size:12px;color:var(--sub);margin-top:12px;">
+  Verdict: moderate_tailwinds · Tailwind score: 70 · Headwind: 25
+</p></div>
+<div class="tab-content" id="environmental"><div class="section-label">Environmental Risk Assessment</div>
+<div class="kpi-grid">
+  <div class="kpi-cell"><div class="kpi-label">Flood Zone</div><div class="kpi-value" style="font-size:18px;">—</div><div class="kpi-sub">MEDIUM</div></div>
+  <div class="kpi-cell"><div class="kpi-label">In Floodplain</div><div class="kpi-value" style="font-size:18px;color:var(--red) if environmental.get('in_floodplain') else 'var(--green)'">NO</div></div>
+  <div class="kpi-cell"><div class="kpi-label">UST Risk</div><div class="kpi-value" style="font-size:18px;color:var(--amber)">HIGH</div><div class="kpi-sub">2000 sites nearby</div></div>
+  <div class="kpi-cell"><div class="kpi-label">Phase I ESA</div><div class="kpi-value" style="font-size:18px;color:var(--amber) if environmental.get('phase_i_recommended') else 'var(--green)'">RECOMMENDED</div></div>
+</div></div>
+<div class="tab-content" id="comps"><div class="section-label">Comparable Sales</div><p>No comp data available. Consider manual research.</p></div>
+<div class="tab-content" id="recommendation"><div class="section-label">Recommendation</div>
+<div style="font-family:var(--font-mono);font-size:18px;color:var(--amber);letter-spacing:0.1em;margin-bottom:16px;font-weight:600;">CONDITIONAL</div>
+
+<div style="font-family:var(--font-body);font-size:14px;color:var(--sub);max-width:700px;line-height:1.7;">
+  <p>Risk: $799,000, worst 66% of capital. Best MOIC 2.39x. Convexity 1.21 (MARGINAL). Conditional — requires price discipline.</p>
+  <p style="margin-top:12px;"><b>Target Offer:</b> $715,500 – $874,500 · <b>Walk Away:</b> $687,140</p>
+  <p style="margin-top:8px;"><b>Moats:</b> 15/24 NARROW MOAT · <b>Convexity:</b> 1.21× (MARGINAL)</p>
+</div>
+
+Frontier: Walk away — worst 66%, best MOIC 2.39x. BUT convexity marginal (ratio 1.21).; CONDITIONAL — pursue at ≤$715,500, walk above $687,140.
+</div>
+
+<div class="footer">
+  CRE Underwriting Analysis · 566-568 New Brunswick Ave, Fords, NJ 08863 · Listing 34554176 · 2026-05-13
+  <br>Methodology: 5-Scenario Architecture · 4-Method Triangulation · 8-Moat Scoring · Convexity Engine
+</div>
+
+</div>
+
+<script>
+function showTab(n) {
+  document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
+  document.getElementById(n).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

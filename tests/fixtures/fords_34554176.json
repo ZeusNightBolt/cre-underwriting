@@ -1,0 +1,368 @@
+{
+  "property": {
+    "address": "566-568 New Brunswick Ave, Fords, NJ 08863",
+    "listing_id": "34554176",
+    "price": 799000,
+    "price_per_sf": 199.75,
+    "building_size_sf": 4000,
+    "building_class": "C",
+    "year_built": 1924,
+    "lot_size_ac": 0.1,
+    "lot_size_sf": 4356,
+    "zoning": "B-2 General Business",
+    "zoning_source": "LOOPNET_LISTING",
+    "parcel": "25-00019-01-00003-03",
+    "municipality": "Woodbridge Township",
+    "county": "Middlesex",
+    "tier": 1,
+    "assessment_total": 117900,
+    "assessment_land": 23000,
+    "assessment_improvements": 94900,
+    "sale_type": "Investment or Owner User",
+    "property_type": "Retail",
+    "property_subtype": "Storefront",
+    "structure": "Fee Simple Building",
+    "is_condo": false,
+    "is_leasehold": false,
+    "leased_pct": 100,
+    "date_on_market": "2025-01-21",
+    "days_on_market": 475,
+    "price_reduction": true,
+    "parking": "Street parking only (no lot)"
+  },
+  "tax_bomb": {
+    "county": "Middlesex",
+    "effective_rate_pct": 2.4,
+    "current_tax_estimated": 2830,
+    "post_sale_tax": 19176,
+    "tax_increase": 16346,
+    "tax_increase_pct": 578,
+    "tax_increase_per_sf": 4.09,
+    "verdict": "MASSIVE \u2014 assessment is only 14.7% of ask. NJ reassesses at sale price. Post-sale tax 6.8\u00d7 current.",
+    "tenant_impact": "NNN leases \u2014 tenants pay taxes. Occupancy cost jumps ~$4/SF. HIGH TENANT RETENTION RISK.",
+    "red_flag_phrases_found": [
+      "RECENT PRICE REDUCTION \u2014 implies overpricing",
+      "475 days on market \u2014 extreme stale listing",
+      "Assessment $117,900 vs Ask $799,000 \u2014 14.7% ratio"
+    ]
+  },
+  "income": {
+    "noi_source": "ESTIMATED \u2014 NOI not disclosed on listing (behind login wall)",
+    "gross_rent_estimated": 64000,
+    "gross_rent_per_sf": 16.0,
+    "rent_range_per_sf": "$14-$18/SF NNN",
+    "vacancy_pct": 5.0,
+    "effective_gross_income": 60800,
+    "management_pct": 4.0,
+    "reserves": 1000,
+    "noi_estimated": 57368,
+    "noi_per_sf": 14.34,
+    "cap_rate_est_pct": 7.18,
+    "gross_rent_multiplier": 12.5,
+    "lease_type": "NNN (tenants pay taxes, insurance, CAM \u2014 owner pays management + structural reserves only)",
+    "tier_min_cap_rate": 5.5,
+    "tier_value_add_cap_rate": 7.0
+  },
+  "hard_asset_floor": {
+    "methodology": "Distressed RE value via land + depreciated improvements",
+    "low": 400000,
+    "mid": 530000,
+    "high": 650000,
+    "low_components": {
+      "land_value": 50000,
+      "building_depreciated": 350000
+    },
+    "mid_components": {
+      "land_value": 75000,
+      "building_depreciated": 455000
+    },
+    "high_components": {
+      "land_value": 100000,
+      "building_depreciated": 550000
+    },
+    "floor_pct_of_ask": 66.3,
+    "note": "No transferable license (retail only). Equipment/FF&E minimal."
+  },
+  "scenarios": {
+    "Worst Case": {
+      "description": "Tax bomb triggers 1 tenant exit. 50% vacancy for 9 months. Re-lease at $12/SF to offset high taxes. Cap rate expands to 9.5%.",
+      "gross_rent": 30000,
+      "vacancy_loss": 18000,
+      "effective_gross": 30000,
+      "expenses": 2200,
+      "noi": 27800,
+      "cap_rate_pct": 9.5,
+      "value": 292632,
+      "value_per_sf": 73,
+      "irr_pct_5yr": -12.0,
+      "moic_5yr": 0.7,
+      "narrative": "Tax bomb ($4/SF increase) pushes one tenant out. Extended vacancy while re-leasing at depressed rents. Distressed sale scenario."
+    },
+    "Baseline": {
+      "description": "Fully leased at estimated market rent. NNN leases roll forward. No operational changes.",
+      "gross_rent": 64000,
+      "vacancy_loss": 3200,
+      "effective_gross": 60800,
+      "expenses": 3432,
+      "noi": 57368,
+      "cap_rate_pct": 7.2,
+      "value": 796778,
+      "value_per_sf": 199,
+      "irr_pct_5yr": 7.0,
+      "moic_5yr": 1.4,
+      "narrative": "Stable NNN retail. Tenant tax burden increases but leases hold. 7.2% cap at ask. Modest cash yield."
+    },
+    "Phase 1 Optimize": {
+      "description": "Minor facade improvements ($15K). Stabilize tenant mix. 2% annual rent escalators on renewals.",
+      "gross_rent": 65280,
+      "vacancy_loss": 1958,
+      "effective_gross": 63322,
+      "expenses": 3533,
+      "noi": 59789,
+      "cap_rate_pct": 7.0,
+      "value": 854129,
+      "value_per_sf": 214,
+      "irr_pct_5yr": 12.0,
+      "moic_5yr": 1.76,
+      "capex": 15000,
+      "narrative": "Minor curb appeal improvements. Rent escalators on renewals. Tax appeals may reduce burden. Cap rate stable."
+    },
+    "Phase 2 Expand": {
+      "description": "Install LED signage ($25K). Add billboard lease revenue from 46' frontage on New Brunswick Ave. Renegotiate to gross leases to capture tax benefit.",
+      "gross_rent": 79200,
+      "vacancy_loss": 2376,
+      "effective_gross": 76824,
+      "expenses": 4073,
+      "noi": 72751,
+      "cap_rate_pct": 6.5,
+      "value": 1119246,
+      "value_per_sf": 280,
+      "irr_pct_5yr": 19.0,
+      "moic_5yr": 2.39,
+      "capex": 25000,
+      "narrative": "Signage + billboard adds $12K/yr. Gross lease conversion captures tax savings. Cap rate compresses on stabilized asset."
+    },
+    "Phase 3 Strategic": {
+      "description": "Assemble adjacent parcels. Apply for mixed-use rezoning. Ground-floor retail + 2-3 apartments above. PILOT eligibility.",
+      "gross_rent": 118400.0,
+      "vacancy_loss": 3000,
+      "effective_gross": 115400.0,
+      "expenses": 15000,
+      "noi": 100400.0,
+      "cap_rate_pct": 5.5,
+      "value": 1825455,
+      "value_per_sf": 456,
+      "irr_pct_5yr": 27.0,
+      "moic_5yr": 3.3,
+      "capex": 350000,
+      "narrative": "Assemble + redevelop to mixed-use. PILOT reduces tax burden to 10-15% of gross. Value-add creates significant upside."
+    }
+  },
+  "valuations": {
+    "asset_based": {
+      "label": "Asset-Based Floor",
+      "low": 400000,
+      "mid": 530000,
+      "high": 650000,
+      "description": "Distressed liquidation value \u2014 land + depreciated building. What you recover without running the business."
+    },
+    "income_based": {
+      "label": "Income-Based (DCF/Cap Rate)",
+      "low": 674918,
+      "mid": 764907,
+      "high": 882585,
+      "description": "NOI $57,368 capitalized at 6.5-8.5%. Midpoint at 7.5% cap."
+    },
+    "revenue_multiple": {
+      "label": "Revenue Multiple Sanity",
+      "low": 512000,
+      "mid": 640000,
+      "high": 768000,
+      "description": "Annual gross rent $64,000 \u00d7 8-12\u00d7 multiple."
+    },
+    "probability_weighted_ev": {
+      "label": "Probability-Weighted EV",
+      "weights": {
+        "worst": 0.2,
+        "base": 0.55,
+        "best": 0.25
+      },
+      "worst_value": 292632,
+      "base_value": 796778,
+      "best_value": 854129,
+      "description": "20% worst / 55% base / 25% Phase 1",
+      "pwev": 710287
+    }
+  },
+  "moats": [
+    {
+      "name": "Scarce Transferable License",
+      "score": 0,
+      "max": 3,
+      "rationale": "No liquor license, no special-use permit. Standard retail zoning."
+    },
+    {
+      "name": "Tourism Corridor Position",
+      "score": 1,
+      "max": 3,
+      "rationale": "New Brunswick Ave is a moderate-traffic commercial corridor (Walk Score 70/100). Not a destination corridor. Feeds local demand."
+    },
+    {
+      "name": "Multi-Revenue-Stream Parcel",
+      "score": 1,
+      "max": 3,
+      "rationale": "Two retail units = two tenants. Billboard potential from 46' frontage adds possible 3rd stream. Currently 2 streams max."
+    },
+    {
+      "name": "Zoning Optionality",
+      "score": 2,
+      "max": 3,
+      "rationale": "B-2 General Business permits retail, office, service, and potentially residential above (verify with Woodbridge zoning). Mixed-use upside exists."
+    },
+    {
+      "name": "Rent-to-Market Gap",
+      "score": 1,
+      "max": 3,
+      "rationale": "Unclear \u2014 NOI not disclosed. If in-place rents are below market ($12/SF vs $16/SF market), gap would be ~25%. Needs lease verification."
+    },
+    {
+      "name": "Brand Longevity & Goodwill",
+      "score": 1,
+      "max": 3,
+      "rationale": "Building dates to 1924 (100+ years continuous commercial use). But tenants unknown \u2014 no established business brand."
+    },
+    {
+      "name": "Asset Stack Coverage",
+      "score": 2,
+      "max": 3,
+      "rationale": "Hard floor $530,000 = 66.3% of ask. Good downside protection at 66.3%."
+    },
+    {
+      "name": "Seller Asymmetry",
+      "score": 3,
+      "max": 3,
+      "rationale": "475 days on market + RECENT PRICE REDUCTION = extreme seller motivation. Stale listing with price cut is textbook seller asymmetry."
+    }
+  ],
+  "moat_total": 11,
+  "moat_max": 24,
+  "lawyer_brain": {
+    "stated_reason_to_sell": "Not disclosed in listing \u2014 likely investor with stale asset",
+    "most_likely_actual_reason": "Stale property, 475 days on market, price reduction \u2014 seller is capitulating. Likely tired landlord or estate seeking exit.",
+    "top_3_concealment_risks": [
+      {
+        "risk": "NOI deliberately hidden behind login wall",
+        "severity": "HIGH",
+        "detail": "LoopNet typically shows NOI/cap rate for income properties. Its absence suggests either very low NOI or the seller/broker doesn't want buyers to see the real cap rate before engaging. The fact that assessment is $117,900 and they're asking $799,000 means any cap rate based on stale taxes is fictitious."
+      },
+      {
+        "risk": "In-place rent well below market \u2014 tenants are under-market",
+        "severity": "MODERATE",
+        "detail": "The 'buyer can occupy one or two units' language implies at least one tenant may be leaving or on month-to-month. If current rents are below market, the listing agent would advertise the mark-to-market upside. Its absence is suspicious."
+      },
+      {
+        "risk": "Deferred maintenance on 1924 building",
+        "severity": "MODERATE",
+        "detail": "Class C, 1924 construction, no renovation year mentioned. Roof, HVAC, electrical, and plumbing are likely near end-of-life. The 'RECENT PRICE REDUCTION' may partially reflect deferred capex the seller is unwilling to fund."
+      }
+    ],
+    "tax_bomb_flag": "Assessment is $117,900 vs ask $799,000 \u2014 post-sale taxes will jump from ~$2,830/yr to ~$19,176/yr. This is the #1 risk to tenant retention under NNN leases.",
+    "days_on_market_flag": "475 days \u2014 this is the 99th percentile for NJ retail listings. Something is wrong at the ask price.",
+    "missing_data": [
+      "NOI / Cap Rate (behind login wall)",
+      "In-place rent roll / lease terms",
+      "Tenant names and lease expiration dates",
+      "Renovation history (none mentioned)",
+      "Environmental Phase I status",
+      "Property tax bill amount",
+      "Utility costs"
+    ]
+  },
+  "divergence": {
+    "absolute_spread": 589246,
+    "capital_normalized_spread": 0.74,
+    "convexity_ratio": 1.21,
+    "convexity_verdict": "MARGINAL",
+    "worst_scenario_value": 292632,
+    "hard_floor_mid": 530000,
+    "effective_worst": 530000,
+    "worst_case_pct_capital": 66,
+    "best_case_moic_5yr": 1.76,
+    "pwev_at_ask": 710287,
+    "pwev_vs_ask_pct": -11.1,
+    "effective_frontier_zone": "UPPER/MID \u2014 ACCEPTABLE SELECTIVELY",
+    "risk_reward_ratio": 2.7
+  },
+  "offer_analysis": [
+    {
+      "price": 550000,
+      "price_per_sf": 138,
+      "all_in_cost": 561000,
+      "cap_rate_pct": 10.23,
+      "gross_rent_multiplier": 8.8,
+      "cash_on_cash_levered_pct": 15.2,
+      "cash_on_cash_all_cash_pct": 10.2
+    },
+    {
+      "price": 650000,
+      "price_per_sf": 162,
+      "all_in_cost": 663000,
+      "cap_rate_pct": 8.65,
+      "gross_rent_multiplier": 10.4,
+      "cash_on_cash_levered_pct": 9.9,
+      "cash_on_cash_all_cash_pct": 8.7
+    },
+    {
+      "price": 700000,
+      "price_per_sf": 175,
+      "all_in_cost": 714000,
+      "cap_rate_pct": 8.03,
+      "gross_rent_multiplier": 11.2,
+      "cash_on_cash_levered_pct": 7.9,
+      "cash_on_cash_all_cash_pct": 8.0
+    },
+    {
+      "price": 750000,
+      "price_per_sf": 188,
+      "all_in_cost": 765000,
+      "cap_rate_pct": 7.5,
+      "gross_rent_multiplier": 12.0,
+      "cash_on_cash_levered_pct": 6.1,
+      "cash_on_cash_all_cash_pct": 7.5
+    },
+    {
+      "price": 799000,
+      "price_per_sf": 200,
+      "all_in_cost": 814980,
+      "cap_rate_pct": 7.04,
+      "gross_rent_multiplier": 12.7,
+      "cash_on_cash_levered_pct": 4.6,
+      "cash_on_cash_all_cash_pct": 7.0
+    }
+  ],
+  "recommendation": {
+    "verdict": "CONDITIONAL PURSUE",
+    "target_offer": 650000,
+    "walk_away": 750000,
+    "settlement_target": 700000,
+    "target_cap_rate_pct": 8.65,
+    "rationale": [
+      "16+ months on market with price reduction = desperate seller. Anchor at hard floor ($530,000) + premium for stabilized NNN income.",
+      "Tax bomb is severe (+578% on reassessment) and WILL impact tenant retention. Price must compensate for this risk.",
+      "At $650K, cap rate is 8.65% \u2014 well above Tier 1 minimum of 5.5%.",
+      "At $700K, cap rate is 8.03% \u2014 still acceptable with value-add upside.",
+      "Above $750K, cap rate drops too thin for Class C, NNN retail with tax bomb risk.",
+      "Seller asymmetry moat score 3/3 is the strongest signal here. Use it."
+    ],
+    "risk_reward_summary": "Risk: $799,000 at risk, effective worst case 66% of capital via hard floor ($530,000). Reward: Phase 1 MOIC 1.76x. Convexity ratio 1.21. Asymmetric if bought right \u2014 pursue at $650-700K.",
+    "key_conditions": [
+      "MUST verify in-place rent roll and lease terms before LOI",
+      "MUST verify post-sale tax bill with Woodbridge Twp tax assessor",
+      "MUST get Phase I environmental on 1924 building",
+      "MUST get roof/HVAC/electrical inspection \u2014 100-year-old building",
+      "MUST verify B-2 zoning permits intended use at Woodbridge zoning office"
+    ]
+  },
+  "analysis_date": "2026-05-10",
+  "data_quality_warning": "NOI, cap rate, and rent roll NOT disclosed on listing. All income estimates are from market comps. Verify with OM/broker before LOI."
+}
