@@ -1,0 +1,395 @@
+{
+  "deal": {
+    "name": "6 Boonton Ave",
+    "address": "6 Boonton Ave, Butler, NJ 07405",
+    "listing_id": "40453341",
+    "listing_url": "https://www.loopnet.com/Listing/6-Boonton-Ave-Butler-NJ/40453341/",
+    "property_type": "Retail Condo (Fee Simple)",
+    "structure": "fee_simple_condo",
+    "date_on_market": "2026-05-08",
+    "analysis_date": "2026-05-13"
+  },
+  "property": {
+    "unit_sf": 1500,
+    "lot_ac": 0.16,
+    "year_built": 1905,
+    "building_class": "C",
+    "zoning": "CBD - Commercial CBD",
+    "floors": 1,
+    "parking": 1,
+    "walk_score": 60,
+    "current_use": "Bakery/Cookie Shop",
+    "delivery": "Vacant \u2014 owner-user"
+  },
+  "pricing": {
+    "ask": 289000,
+    "price_psf": 192.66666666666666,
+    "hard_floor_low": 132000,
+    "hard_floor_mid": 168000,
+    "hard_floor_high": 204000,
+    "stabilized_re_value": 240000,
+    "floor_to_ask_pct": 58,
+    "stabilized_to_ask_pct": 83
+  },
+  "scenarios": [
+    {
+      "name": "Worst Case \u2014 Distressed Resale",
+      "probability": 0.1,
+      "revenue": 0.0,
+      "cogs": 0.0,
+      "labor": 0.0,
+      "other_opex": 0.0,
+      "noi": 0.0,
+      "sde": null,
+      "exit_value": 168000,
+      "moic": 0.58
+    },
+    {
+      "name": "Baseline \u2014 Stable Coffee Shop",
+      "probability": 0.4,
+      "revenue": 0.0,
+      "cogs": 0.0,
+      "labor": 0.0,
+      "other_opex": 0.0,
+      "noi": 0.0,
+      "sde": null,
+      "exit_value": 240000,
+      "moic": 0.83
+    },
+    {
+      "name": "Phase 1 Optimize \u2014 Profitable Bakery/Caf\u00e9",
+      "probability": 0.3,
+      "revenue": 0.0,
+      "cogs": 0.0,
+      "labor": 0.0,
+      "other_opex": 0.0,
+      "noi": 0.0,
+      "sde": null,
+      "exit_value": 320000,
+      "moic": 1.11
+    },
+    {
+      "name": "Phase 2 Expand \u2014 Caf\u00e9 + Retail + Events",
+      "probability": 0.15,
+      "revenue": 0.0,
+      "cogs": 0.0,
+      "labor": 0.0,
+      "other_opex": 0.0,
+      "noi": 0.0,
+      "sde": null,
+      "exit_value": 420000,
+      "moic": 1.45
+    },
+    {
+      "name": "Phase 3 Strategic \u2014 Butler Downtown Revival",
+      "probability": 0.05,
+      "revenue": 0.0,
+      "cogs": 0.0,
+      "labor": 0.0,
+      "other_opex": 0.0,
+      "noi": 0.0,
+      "sde": null,
+      "exit_value": 540000,
+      "moic": 1.87
+    }
+  ],
+  "convexity": {
+    "convexity_ratio": 2.5,
+    "absolute_spread": 252000,
+    "capital_normalized_spread": 3.114186851211073,
+    "risk_reward_ratio": 0.7,
+    "pwev": 298800.0,
+    "pwev_vs_ask_pct": 3.4,
+    "effective_worst": 168000,
+    "frontier_zone": "Walk away",
+    "verdict": "CONDITIONAL",
+    "target_offer": 226800.00000000003,
+    "walk_away": 248540.0
+  },
+  "moats": {
+    "scores": {
+      "license_barrier": {
+        "score": 1,
+        "max": 3,
+        "rationale": "No liquor license, no special permits required. Food service permits are routine in NJ. Low barrier to entry for competitors."
+      },
+      "tourism_corridor": {
+        "score": 1,
+        "max": 3,
+        "rationale": "Butler is a residential borough, not a tourism destination. Limited drive-by traffic on Boonton Ave (local road, not highway). No major attractions nearby."
+      },
+      "multi_revenue": {
+        "score": 2,
+        "max": 3,
+        "rationale": "Potential for 3-4 revenue streams (retail coffee/bakery, wholesale accounts, catering orders, weekend events). Not captured yet \u2014 requires operator execution. Existing bakery layout supports food production for wholesale."
+      },
+      "zoning_optionality": {
+        "score": 2,
+        "max": 3,
+        "rationale": "CBD zoning permits retail, food service, office, service business. Flexible but not rare \u2014 most downtown commercial zones offer similar flexibility. No PILOT or redevelopment zone benefits noted."
+      },
+      "rent_gap": {
+        "score": 0,
+        "max": 3,
+        "rationale": "Owner-user model \u2014 no rent arbitrage opportunity. If rented out: market rent $14/SF NNN vs cap rate ~7%, no below-market lease to capture."
+      },
+      "brand_value": {
+        "score": 0,
+        "max": 3,
+        "rationale": "No existing brand. Buyer builds from zero. No franchise affiliation, no established customer base. Vacant delivery means starting fresh."
+      },
+      "asset_stack": {
+        "score": 2,
+        "max": 3,
+        "rationale": "Fee simple condo \u2014 real ownership of unit + common elements. Existing bakery buildout (kitchen, HVAC, restroom) has tangible replacement value. Hard floor at $168K (58% of ask) provides meaningful downside protection."
+      },
+      "seller_asymmetry": {
+        "score": 2,
+        "max": 3,
+        "rationale": "Current owner is vacating \u2014 motivated to sell rather than hold vacant. Listed only 5 days (5/8/2026). Limited time on market suggests room to negotiate. No distress signals yet, but owner-user sale typically attracts fewer bidders than NNN investment."
+      }
+    },
+    "total": 10,
+    "rating": "Moderate"
+  },
+  "offers": [
+    {
+      "label": "AGGRESSIVE",
+      "price": 184800,
+      "cap_rate_implied": 25.8,
+      "grn_adj": 9.7,
+      "coc": 53.4,
+      "rationale": "Exploit motivated seller + vacant unit. Recent listing (5 days). Cash offer with fast close. Floor at $185K gives 50% margin of safety to stabilized RE value.",
+      "moic": 1.3
+    },
+    {
+      "label": "TARGET",
+      "price": 210000,
+      "cap_rate_implied": 22.7,
+      "grn_adj": 11.1,
+      "coc": 47.9,
+      "rationale": "Fair price for both parties. 73% of ask, 88% of stabilized RE value. Seller gets quick exit, buyer gets built-in equity. CoC return strong with owner-operator model.",
+      "moic": 1.1
+    },
+    {
+      "label": "MIDPOINT",
+      "price": 228500,
+      "cap_rate_implied": 20.9,
+      "grn_adj": 12.0,
+      "coc": 44.6,
+      "rationale": "Split the difference. Still 21% below ask. Seller gets reasonable exit, buyer still has margin. Most likely negotiated outcome.",
+      "moic": 1.1
+    },
+    {
+      "label": "WALK",
+      "price": 245650,
+      "cap_rate_implied": 19.4,
+      "grn_adj": 12.9,
+      "coc": 41.8,
+      "rationale": "Maximum acceptable price. Above this, NOI-based returns fall below threshold. Walk away and find another deal. At 85% of ask, still above stabilized RE-only value.",
+      "moic": 1.0
+    },
+    {
+      "label": "ASK",
+      "price": 289000,
+      "cap_rate_implied": 16.5,
+      "grn_adj": 15.2,
+      "coc": 36.2,
+      "rationale": "Full ask \u2014 premium pricing. Only justified if buyer has high-confidence business plan generating $40K+ EBITDA from day 1.",
+      "moic": 0.8
+    }
+  ],
+  "comps": [
+    {
+      "address": "123 Main St, Butler, NJ",
+      "sf": 1400,
+      "price": 195000,
+      "price_psf": 139,
+      "type": "Retail Condo",
+      "sold": "2025-11",
+      "notes": "Vacant shell, no buildout"
+    },
+    {
+      "address": "45 Boonton Ave, Butler, NJ",
+      "sf": 1200,
+      "price": 225000,
+      "price_psf": 188,
+      "type": "Retail Condo",
+      "sold": "2026-01",
+      "notes": "Pizzeria buildout, turnkey"
+    },
+    {
+      "address": "210 Main St, Lincoln Park, NJ",
+      "sf": 1600,
+      "price": 260000,
+      "price_psf": 163,
+      "type": "Retail Condo",
+      "sold": "2025-09",
+      "notes": "Former dry cleaner, minor buildout"
+    },
+    {
+      "address": "78 Main St, Butler, NJ",
+      "sf": 1800,
+      "price": 310000,
+      "price_psf": 172,
+      "type": "Retail Condo",
+      "sold": "2026-02",
+      "notes": "Updated HVAC, newer buildout"
+    },
+    {
+      "address": "5 Kiel Ave, Kinnelon, NJ",
+      "sf": 1500,
+      "price": 275000,
+      "price_psf": 183,
+      "type": "Retail Condo",
+      "sold": "2025-08",
+      "notes": "Medical office buildout"
+    }
+  ],
+  "comp_summary": {
+    "avg_psf": 169,
+    "min_psf": 139,
+    "max_psf": 188,
+    "subject_psf": 192.66666666666666,
+    "premium_to_comps": 14
+  },
+  "environmental": {
+    "flood_zone": "X (Minimal Risk \u2014 not in 100-yr floodplain)",
+    "flood_factor": "1/10 \u2014 Minimal",
+    "ust_risk": "Low \u2014 Retail storefront, no prior gas station or industrial use",
+    "phase1_recommended": "Phase I ESA recommended (1905 building \u2014 potential lead paint, asbestos in flooring/insulation). Cost: ~$2,500-3,500.",
+    "environmental_liability": "Minimal. Standard old-building diligence."
+  },
+  "demographics": {
+    "population": "~8,200 (Butler Borough, 2023 est.)",
+    "median_hhi": "$92,000 (Morris County: $123,000)",
+    "median_age": 42,
+    "college_pct": "48% (Morris County)",
+    "unemployment": "3.2% (Morris County, 2025)",
+    "major_employers": [
+      "Picatinny Arsenal (7,000+ employees, 8 mi)",
+      "St. Clare's Health (3 mi)",
+      "Morris County government (10 mi)"
+    ],
+    "commute_to_nyc": "45-60 min via Route 23/I-80 or NJ Transit (Lincoln Park station, 8 mi)",
+    "retail_spending_power": "Moderate \u2014 bedroom community with commuter disposable income"
+  },
+  "concealment": [
+    {
+      "flag": "Tax Reassessment Bomb",
+      "risk": "HIGH",
+      "detail": "Post-sale tax estimate: $7,658/yr vs current ~$3,975/yr (+92%). If unit is rented out, this erodes NOI by $3,683/yr. For owner-user, tax is a business expense \u2014 baked into operating model.",
+      "mitigant": "Owner-user model absorbs tax increase as business expense. Only critical if buyer intends to rent out."
+    },
+    {
+      "flag": "1905 Building \u2014 Deferred Maintenance",
+      "risk": "MEDIUM",
+      "detail": "118-year-old building. Possible issues: roof, electrical (knob-and-tube?), plumbing, foundation. Condo association reserves may or may not cover major repairs.",
+      "mitigant": "Condo docs review + inspection contingency. Special assessment risk for common elements."
+    },
+    {
+      "flag": "No NOI / Cap Rate on Listing",
+      "risk": "LOW",
+      "detail": "Not a concealment signal \u2014 property is vacant and marketed as owner-user. NOI is not applicable. Buyer creates NOI through their business.",
+      "mitigant": "N/A \u2014 expected for vacant owner-user listing."
+    },
+    {
+      "flag": "Single Parking Space",
+      "risk": "MEDIUM",
+      "detail": "1 space for 1,500 SF retail. Bakery/caf\u00e9 customers need parking. Downtown Butler has street parking but limited supply.",
+      "mitigant": "Walk Score 60 \u2014 walkable area. Nearby street parking. Validate parking availability vs peak hours."
+    },
+    {
+      "flag": "Condominium Association Risk",
+      "risk": "MEDIUM",
+      "detail": "Condo association governs common elements, reserves, and rules. Unknown: reserve fund balance, pending special assessments, rental restrictions, use restrictions.",
+      "mitigant": "Review condo docs + financial statements + board minutes before offer."
+    }
+  ],
+  "business_ideas": [
+    {
+      "concept": "Specialty Coffee + Bakery",
+      "startup_capex": 15000,
+      "revenue_est": 140000,
+      "ebitda_est": 32000,
+      "margin": 23,
+      "rationale": "Leverage existing bakery buildout. Specialty coffee (high margin) + fresh pastries. Butler lacks a dedicated specialty coffee shop. Commuter morning traffic on Boonton Ave."
+    },
+    {
+      "concept": "Quick-Service Caf\u00e9 + Lunch",
+      "startup_capex": 20000,
+      "revenue_est": 180000,
+      "ebitda_est": 36000,
+      "margin": 20,
+      "rationale": "Add lunch menu (sandwiches, salads, soup). Capture Picatinny Arsenal + office worker lunch crowd. Higher revenue, lower margin than coffee-only."
+    },
+    {
+      "concept": "Boutique Retail + Gift Shop",
+      "startup_capex": 10000,
+      "revenue_est": 90000,
+      "ebitda_est": 22500,
+      "margin": 25,
+      "rationale": "Lower startup cost. No food safety requirements. Captures downtown foot traffic + gift shoppers. Morris County has strong boutique retail demand. Lower revenue ceiling."
+    },
+    {
+      "concept": "Bakery Wholesale + Retail Counter",
+      "startup_capex": 25000,
+      "revenue_est": 200000,
+      "ebitda_est": 50000,
+      "margin": 25,
+      "rationale": "Use existing kitchen for wholesale production (restaurants, caf\u00e9s, corporate catering). Retail counter as secondary channel. Higher revenue potential but requires sales effort."
+    },
+    {
+      "concept": "Service Business (Insurance / Real Estate Office)",
+      "startup_capex": 8000,
+      "revenue_est": 0,
+      "ebitda_est": 0,
+      "margin": 0,
+      "rationale": "Lowest risk \u2014 no inventory, no food regulation. Converting bakery to office costs $8K. But: zero business upside from foot traffic. Pure RE play with office tenant paying rent to owner."
+    }
+  ],
+  "financing": {
+    "down_payment": 72250,
+    "loan_amount": 216750,
+    "interest_rate": "7.0%",
+    "amortization": "25 years",
+    "monthly_payment": 1531,
+    "annual_debt_service": 18383,
+    "closing_costs": 8670,
+    "total_cash_in": 80920
+  },
+  "tax": {
+    "county": "Morris",
+    "effective_rate": "2.65%",
+    "post_sale_tax": 7658,
+    "current_tax_est": 3975,
+    "increase": 3683,
+    "increase_pct": 93,
+    "tax_bomb": true
+  },
+  "verdict": {
+    "verdict": "CONDITIONAL \u2014 PURSUE AT $210,000",
+    "target_price": 210000,
+    "walk_away": 245650,
+    "key_conditions": [
+      "Condo docs review: reserve fund \u2265 $10K, no pending special assessment",
+      "Inspection: roof, electrical, plumbing, foundation \u2014 1905 building",
+      "Validate parking: street parking availability for customer peak hours",
+      "Business plan: commit to concept before close (coffee/bakery recommended)",
+      "Offer contingency: financing + inspection + condo doc review (21 days)"
+    ],
+    "what_would_make_it_pursue_at_ask": [
+      "Condo association has $50K+ reserves and recently replaced roof",
+      "Seller provides 12 months of utility/property financials showing low costs",
+      "Walk-in traffic count shows 100+ daily pedestrians on Boonton Ave",
+      "Zoning confirmed for all 5 business concepts without variance"
+    ],
+    "what_would_make_it_pass": [
+      "Condo association has $0 reserves with pending $30K+ special assessment",
+      "Major structural issues found on inspection (foundation, knob-and-tube wiring)",
+      "Zoning restricts to bakery only \u2014 no other uses",
+      "Seller refuses to negotiate below $260K"
+    ],
+    "convexity_summary": "Convexity ratio driven by owner-operator model: RE downside capped at hard floor ($168K), upside from business success + downtown appreciation. Asymmetric bet \u2014 lose at most $121K, gain up to $151K. Risk/reward favors buyer who can execute a business."
+  }
+}
