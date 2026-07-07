@@ -9,7 +9,7 @@ Each function:
 """
 
 from .llm_client import call_triple_llm
-from .models import LiveContext, Range
+from .models import LiveContext
 
 
 # ═══════════════════════════════════════════════════════════
@@ -367,7 +367,7 @@ def _format_list(items, max_n=5) -> str:
     for item in items[:max_n]:
         if isinstance(item, dict):
             title = item.get("title", item.get("address", ""))
-            snippet = item.get("snippet", item.get("description", ""))
+            snippet = item.get("snippet", item.get("description", "")) or ""
             lines.append(f"- {title}: {snippet[:200]}")
         else:
             lines.append(f"- {str(item)[:200]}")

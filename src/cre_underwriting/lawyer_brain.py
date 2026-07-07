@@ -198,7 +198,7 @@ class LawyerBrain:
     def _compute_tax_bomb(deal_data: dict) -> Dict[str, Any]:
         """Quantify tax reassessment risk for NJ properties."""
         tax = deal_data.get("tax_bomb", deal_data.get("tax", {}))
-        prop = deal_data.get("property", {})
+        deal_data.get("property", {})
 
         return {
             "current_tax_estimated": tax.get("current_tax_estimated", 0),

@@ -277,7 +277,7 @@ class ConvexityEngine:
                 convexity_ratio=div.convexity_ratio, zone=frontier.zone,
                 reasoning=[f"Frontier: {frontier.zone}. "
                           f"Negative convexity ({div.convexity_ratio:.2f})."],
-                risk_reward_summary=f"Walk away — insufficient upside for the risk.")
+                risk_reward_summary="Walk away — insufficient upside for the risk.")
 
         # Gate 3: Pursue aggressively
         if frontier.zone == "Pursue aggressively":
@@ -336,11 +336,11 @@ class ConvexityEngine:
 # ── Convenience Functions ────────────────────────────────────
 
 def analyze_deal(ask_price: float,
-                 purchase_price: float = None,
+                 purchase_price: Optional[float] = None,
                  hard_floor_low: float = 0,
                  hard_floor_mid: float = 0,
                  hard_floor_high: float = 0,
-                 scenarios: List[Scenario] = None,
+                 scenarios: Optional[List[Scenario]] = None,
                  **kwargs) -> ConvexityResult:
     """Convenience: build a DealInput and run full analysis."""
     if purchase_price is None:

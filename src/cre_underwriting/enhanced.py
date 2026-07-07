@@ -14,14 +14,14 @@ Usage:
 
 import re
 from datetime import date
-from typing import List, Optional, Dict, Tuple
 
 from .constants import MOATS, OFFERS
 from .models import (
-    Comp, EnvironmentalRisk, EconomicIndicators, MoatDimension,
+    MoatDimension,
     MoatScorecard, OfferLadder, OfferPoint, extract_pricing,
 )
 from .lawyer_brain import LawyerBrain
+from typing import Optional
 
 
 class MoatScorer:
@@ -40,7 +40,7 @@ class MoatScorer:
     """
 
     @staticmethod
-    def score(deal_data: dict, county_profile: dict = None) -> MoatScorecard:
+    def score(deal_data: dict, county_profile: Optional[dict] = None) -> MoatScorecard:
         prop = deal_data.get("property") or {}
         income = deal_data.get("income") or {}
         # Shared schema normalization: handles both the classic schema
@@ -106,9 +106,12 @@ class MoatScorer:
                    "pilot", "redevelopment zone", "opportunity zone",
                    "special use permit", "conditional use"]
         matches = sum(1 for kw in keywords if kw in desc or kw in sale_type)
-        if matches >= 2: return 3
-        if matches == 1: return 2
-        if "pilot" in desc or "redevelopment" in desc: return 1
+        if matches >= 2:
+            return 3
+        if matches == 1:
+            return 2
+        if "pilot" in desc or "redevelopment" in desc:
+            return 1
         return 0
 
     @staticmethod
@@ -122,19 +125,22 @@ class MoatScorer:
         return "No liquor license, special-use permit, or PILOT. No regulatory moat."
 
     @staticmethod
-    def _score_corridor(prop: dict, county_profile: dict = None) -> int:
+    def _score_corridor(prop: dict, county_profile: Optional[dict] = None) -> int:
         zoning = prop.get("zoning", "").lower()
         dom = int(prop.get("days_on_market", 0) or 0)
         high_value = ["b-1", "b-2", "c-1", "c-2", "h", "hoboken", "downtown",
                       "main st", "broadway", "washington", "waterfront"]
         has_prime = any(z in zoning for z in high_value)
-        if has_prime and dom < 90: return 3
-        if has_prime: return 2
-        if dom < 180: return 1
+        if has_prime and dom < 90:
+            return 3
+        if has_prime:
+            return 2
+        if dom < 180:
+            return 1
         return 1
 
     @staticmethod
-    def _corridor_rationale(prop: dict, county_profile: dict = None) -> str:
+    def _corridor_rationale(prop: dict, county_profile: Optional[dict] = None) -> str:
         if any(z in prop.get("zoning", "").lower() for z in ["b-1", "b-2"]):
             return "Primary commercial corridor with established retail traffic."
         return "Local-serving corridor — neighborhood demand, not a destination."
@@ -145,13 +151,18 @@ class MoatScorer:
         income = deal_data.get("income", {})
         desc = (deal_data.get("description", prop.get("description", ""))).lower()
         streams = 1 if income.get("gross_rent", 0) > 0 else 0
-        if "apartment" in desc or "residential" in desc: streams += 1
-        if any(w in desc for w in ["laundromat", "parking", "storage"]): streams += 1
+        if "apartment" in desc or "residential" in desc:
+            streams += 1
+        if any(w in desc for w in ["laundromat", "parking", "storage"]):
+            streams += 1
         units = prop.get("units", 1)
-        if units >= 4: streams = max(streams, units // 2)
+        if units >= 4:
+            streams = max(streams, units // 2)
         streams = max(1, streams)
-        if streams >= 4: return 3
-        if streams >= 2: return 2
+        if streams >= 4:
+            return 3
+        if streams >= 2:
+            return 2
         return 1
 
     @staticmethod
@@ -160,8 +171,10 @@ class MoatScorer:
         income = deal_data.get("income", {})
         desc = (deal_data.get("description", prop.get("description", ""))).lower()
         streams = 1 if income.get("gross_rent", 0) > 0 else 0
-        if "apartment" in desc or "residential" in desc: streams += 1
-        if any(w in desc for w in ["laundromat", "parking", "storage"]): streams += 1
+        if "apartment" in desc or "residential" in desc:
+            streams += 1
+        if any(w in desc for w in ["laundromat", "parking", "storage"]):
+            streams += 1
         if streams >= 4:
             return f"{streams} income streams from single parcel — strong diversification. One tenant's distress doesn't sink the property."
         elif streams >= 2:
@@ -172,9 +185,12 @@ class MoatScorer:
     def _score_zoning(prop: dict) -> int:
         zoning = prop.get("zoning", "").lower()
         desc = prop.get("description", "").lower()
-        if "mixed" in zoning or "mixed-use" in desc: return 3
-        if "redevelopment" in desc: return 2
-        if "commercial" in zoning or "business" in zoning: return 2
+        if "mixed" in zoning or "mixed-use" in desc:
+            return 3
+        if "redevelopment" in desc:
+            return 2
+        if "commercial" in zoning or "business" in zoning:
+            return 2
         return 1
 
     @staticmethod
@@ -188,7 +204,6 @@ class MoatScorer:
     def _score_rent_gap(income: dict) -> int:
         rent_est = income.get("gross_rent_per_sf", 0)
         rent_range = income.get("rent_range_per_sf", "")
-        noi_source = income.get("noi_source", "")
         if not rent_range or not rent_est:
             # Can't verify — return 1 so it doesn't falsely score 0
             return 1
@@ -196,8 +211,10 @@ class MoatScorer:
         if len(nums) >= 2:
             market_high = float(nums[-1])
             gap_pct = (market_high - rent_est) / rent_est * 100 if rent_est > 0 else 0
-            if gap_pct >= MOATS.rent_gap_high_pct: return 3
-            if gap_pct >= MOATS.rent_gap_medium_pct: return 2
+            if gap_pct >= MOATS.rent_gap_high_pct:
+                return 3
+            if gap_pct >= MOATS.rent_gap_medium_pct:
+                return 2
         return 1  # At or near market
 
     @staticmethod
@@ -206,7 +223,7 @@ class MoatScorer:
         noi_src = income.get("noi_source", "")
         if "ESTIMATED" in noi_src:
             return f"Estimated rent ${rent_est}/SF — verify with rent roll."
-        return f"In-place rent near market. Limited mark-to-market upside."
+        return "In-place rent near market. Limited mark-to-market upside."
 
     @staticmethod
     def _score_brand(deal_data: dict) -> int:
@@ -217,9 +234,12 @@ class MoatScorer:
         keywords = ["established", "family-owned", "franchise", "long-term",
                    "decades", "renowned", "institution"]
         signals = sum(1 for kw in keywords if kw in desc)
-        if signals >= 2 and years >= MOATS.brand_long_years: return 3
-        if signals >= 1 or years >= MOATS.brand_medium_years: return 2
-        if years >= MOATS.brand_short_years: return 1
+        if signals >= 2 and years >= MOATS.brand_long_years:
+            return 3
+        if signals >= 1 or years >= MOATS.brand_medium_years:
+            return 2
+        if years >= MOATS.brand_short_years:
+            return 1
         return 1
 
     @staticmethod
@@ -228,9 +248,12 @@ class MoatScorer:
 
     @staticmethod
     def _score_asset_stack(floor_pct: float) -> int:
-        if floor_pct >= MOATS.stack_high_pct: return 3
-        if floor_pct >= MOATS.stack_medium_pct: return 2
-        if floor_pct >= MOATS.stack_low_pct: return 1
+        if floor_pct >= MOATS.stack_high_pct:
+            return 3
+        if floor_pct >= MOATS.stack_medium_pct:
+            return 2
+        if floor_pct >= MOATS.stack_low_pct:
+            return 1
         return 0
 
     @staticmethod
@@ -244,10 +267,14 @@ class MoatScorer:
         dom = int(prop.get("days_on_market", 0) or 0)
         pr = prop.get("price_reduction", False)
         score = 0
-        if dom > 360: score += 2
-        elif dom > 180: score += 1
-        if pr: score += 1
-        if "redevelopment" in prop.get("sale_type", "").lower(): score += 1
+        if dom > 360:
+            score += 2
+        elif dom > 180:
+            score += 1
+        if pr:
+            score += 1
+        if "redevelopment" in prop.get("sale_type", "").lower():
+            score += 1
         return min(3, score)
 
     @staticmethod
@@ -318,8 +345,8 @@ class EnhancedAnalyzer:
     into a single result dict.
     """
 
-    def __init__(self, deal_data: dict, env_data: dict = None,
-                 comps_data: dict = None):
+    def __init__(self, deal_data: dict, env_data: Optional[dict] = None,
+                 comps_data: Optional[dict] = None):
         self.deal = deal_data
         self.env = env_data or {}
         self.comps_data = comps_data or {}
@@ -476,8 +503,8 @@ def _synthesize_comps(deal_data: dict, prop: dict) -> list:
     return comps
 
 
-def from_json_files(deal_path: str, env_path: str = None,
-                    comps_path: str = None) -> dict:
+def from_json_files(deal_path: str, env_path: Optional[str] = None,
+                    comps_path: Optional[str] = None) -> dict:
     """Load deal analysis from JSON files and run enhanced analysis."""
     import json
     with open(deal_path) as f:

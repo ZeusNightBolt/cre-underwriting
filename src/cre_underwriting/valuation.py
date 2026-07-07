@@ -37,8 +37,7 @@ REPLACEMENT_COST = {
 def compute_depreciation(year_built: int, year_renovated: Optional[int] = None,
                           current_year: int = 2026) -> float:
     """Estimate physical depreciation as % of replacement cost."""
-    effective_age = current_year - (year_renovated or year_built)
-    actual_age = current_year - year_built
+    effective_age: float = current_year - (year_renovated or year_built)
     
     # Renovation resets effective age (not to zero, but reduces)
     if year_renovated:
@@ -53,7 +52,7 @@ def compute_depreciation(year_built: int, year_renovated: Optional[int] = None,
 
 
 # ── License detection patterns ──
-LICENSE_PATTERNS = [
+LICENSE_PATTERNS: List[Dict[str, Any]] = [
     {
         "type": "Liquor License",
         "keywords": ["liquor license", "abc license", "alcohol license", "beer and wine",
@@ -193,7 +192,7 @@ def estimate_equipment_value(sf: int, property_type: str, building_class: str,
     eq_low, eq_high = bc
     
     # Check for special equipment mentions
-    special_equipment = []
+    special_equipment: List[Dict[str, Any]] = []
     text_lower = listing_text.lower()
     if "walk-in cooler" in text_lower or "walk-in freezer" in text_lower:
         special_equipment.append({"item": "Walk-in cooler/freezer", "value": 20000})
@@ -220,7 +219,7 @@ def estimate_equipment_value(sf: int, property_type: str, building_class: str,
     }
 
 
-def detect_licenses(listing_text: str, state: str = None) -> List[Dict[str, Any]]:
+def detect_licenses(listing_text: str, state: Optional[str] = None) -> List[Dict[str, Any]]:
     """Detect transferable licenses from listing description text."""
     import re
     state = (state or "NJ").upper()
@@ -276,7 +275,6 @@ def valuation_triangulation(deal: Dict[str, Any]) -> Dict[str, Any]:
     year_built = prop.get("year_built", 1970) or 1970
     year_renovated = prop.get("year_renovated") or None
     zoning = prop.get("zoning", "C2") or "C2"
-    state = prop.get("state", "NJ")
     ask_price = prop.get("price", 0) or 0
     submarket = deal.get("market", {}).get("submarket", "") or deal.get("submarket", "") or ""
     
@@ -297,7 +295,7 @@ def valuation_triangulation(deal: Dict[str, Any]) -> Dict[str, Any]:
     equipment = estimate_equipment_value(sf, property_type, building_class, listing_text or "")
     licenses = detect_licenses(listing_text or "", detected_state)
     
-    license_total = sum(l["value_high"] for l in licenses)
+    license_total = sum(lv["value_high"] for lv in licenses)
     
     # Triangulation
     hard_low = land["value_low"] + building["depreciated_value_low"] + equipment["value_low"] + license_total

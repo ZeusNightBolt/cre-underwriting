@@ -1,7 +1,6 @@
 """Test suite for CRE Underwriting convexity engine."""
 
 import json
-import math
 import pytest
 from pathlib import Path
 

@@ -13,14 +13,12 @@ Usage:
 """
 
 import json
-import os
 from datetime import date
-from pathlib import Path
-from typing import Optional
 
 from .convexity import ConvexityEngine, from_json
 from .enhanced import EnhancedAnalyzer
 from .environmental import assess_location
+from typing import Optional
 
 
 class PipelineOrchestrator:
@@ -35,8 +33,8 @@ class PipelineOrchestrator:
     def __init__(self):
         self.convexity = ConvexityEngine()
 
-    def run(self, deal_path: str, env_path: str = None,
-            comps_path: str = None) -> dict:
+    def run(self, deal_path: str, env_path: Optional[str] = None,
+            comps_path: Optional[str] = None) -> dict:
         """
         Run the full pipeline on a deal JSON file.
 
@@ -99,8 +97,8 @@ class PipelineOrchestrator:
             "enhanced": enhanced,
         }
 
-    def run_dict(self, deal_data: dict, env_data: dict = None,
-                 comps_data: dict = None) -> dict:
+    def run_dict(self, deal_data: dict, env_data: Optional[dict] = None,
+                 comps_data: Optional[dict] = None) -> dict:
         """Run pipeline from in-memory dicts (no file I/O)."""
         convexity_result = from_json(deal_data)
         convexity = convexity_result.to_dict()

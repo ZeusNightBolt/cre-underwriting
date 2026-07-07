@@ -29,7 +29,7 @@ import subprocess
 import time
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Tuple, List
+from typing import Any, Optional, Dict, Tuple, List
 from urllib.parse import urlparse
 
 
@@ -74,7 +74,7 @@ MAX_DELAY = 30.0     # seconds
 # Stage 1: Anti-Bot Detection
 # ════════════════════════════════════════════════════════════
 
-def detect_protection(url: str, timeout: int = 10) -> Dict[str, any]:
+def detect_protection(url: str, timeout: int = 10) -> Dict[str, Any]:
     """
     Detect what anti-bot protection a site uses.
 
@@ -210,7 +210,7 @@ def _attempt_curl_cffi(url: str, timeout: int = 15) -> Optional[str]:
 # Block-Page Classifier
 # ════════════════════════════════════════════════════════════
 
-from enum import Enum
+from enum import Enum  # noqa: E402 — intentional section-local import
 
 class BlockReason(Enum):
     OK = "ok"
@@ -222,7 +222,7 @@ class BlockReason(Enum):
 
 
 def classify_block(html: str, status_code: int = 200,
-                   headers: dict = None) -> BlockReason:
+                   headers: Optional[dict] = None) -> BlockReason:
     """
     Classify WHY we were blocked, not just THAT we were blocked.
     """
@@ -265,8 +265,8 @@ def classify_block(html: str, status_code: int = 200,
 # Per-Domain Tier Cache (sqlite)
 # ════════════════════════════════════════════════════════════
 
-import sqlite3
-import threading
+import sqlite3  # noqa: E402 — intentional section-local import
+import threading  # noqa: E402 — intentional section-local import
 
 _tier_cache_lock = threading.Lock()
 TIER_CACHE_DB = os.path.expanduser("~/.cache/cre_underwriting/tier_cache.db")
@@ -597,6 +597,7 @@ def scrape_with_cascade(url: str, bidi_port: int = DEFAULT_BIDI_PORT,
 
         reason = classify_block(html or "", 200 if html else 403)
         if reason == BlockReason.OK:
+            html = html or ""
             if use_cache:
                 _cache_set(url, html)
             set_cached_tier(domain, tier_name)
@@ -606,7 +607,8 @@ def scrape_with_cascade(url: str, bidi_port: int = DEFAULT_BIDI_PORT,
             try:
                 html = fetcher()
                 if html and classify_block(html) == BlockReason.OK:
-                    if use_cache: _cache_set(url, html)
+                    if use_cache:
+                        _cache_set(url, html)
                     set_cached_tier(domain, tier_name)
                     return html, tier_name
             except Exception:
@@ -707,7 +709,7 @@ def cache_stats() -> Dict:
 # Convenience: Batch scraping with resume
 # ════════════════════════════════════════════════════════════
 
-def scrape_batch(urls: List[str], output_dir: str = None,
+def scrape_batch(urls: List[str], output_dir: Optional[str] = None,
                  resume_from: int = 0, max_per_session: int = 15,
                  bidi_port: int = DEFAULT_BIDI_PORT) -> List[Dict]:
     """

@@ -17,7 +17,6 @@ import json
 import os
 import re
 import subprocess
-import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -234,8 +233,8 @@ def call_triple_llm(
     errors = []
 
     # ── Step 1: Parallel fire all 3 models ──
-    results = {"deepseek": None, "openrouter": None, "mistral": None}
-    parsed = {"deepseek": None, "openrouter": None, "mistral": None}
+    results: Dict[str, Optional[str]] = {"deepseek": None, "openrouter": None, "mistral": None}
+    parsed: Dict[str, Optional[dict]] = {"deepseek": None, "openrouter": None, "mistral": None}
 
     def _call_with_retry(model_name, call_fn):
         current_prompt = full_prompt

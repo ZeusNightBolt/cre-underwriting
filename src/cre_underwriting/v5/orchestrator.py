@@ -12,10 +12,9 @@ Usage:
 """
 
 import json
-import time
 from datetime import date
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from .models import (
     LiveContext, Range, DealInput,
@@ -35,7 +34,7 @@ class V5PipelineOrchestrator:
       D (K12): Dashboard generation + Vercel deploy
     """
 
-    def __init__(self, output_dir: str = None, deal_slug: str = None):
+    def __init__(self, output_dir: Optional[str] = None, deal_slug: Optional[str] = None):
         if output_dir:
             self.output_dir = Path(output_dir)
         else:
@@ -47,7 +46,7 @@ class V5PipelineOrchestrator:
     def run(self, deal_input: DealInput) -> Dict[str, Any]:
         """Run full v5 pipeline from a DealInput."""
         if deal_input.source_type == "fixture":
-            return self._run_from_fixture(deal_input.source_value)
+            return self.run_fixture(deal_input.source_value)
         elif deal_input.source_type == "url":
             return self._run_from_url(deal_input.source_value)
         else:
@@ -64,7 +63,6 @@ class V5PipelineOrchestrator:
         prop = fixture.get("property", {})
         income = fixture.get("income", {})
         pricing = fixture.get("pricing", {})
-        hf = fixture.get("hard_asset_floor", {})
 
         self.ctx.address = prop.get("address", "") or fixture.get("deal", {}).get("address", "")
         self.ctx.city = prop.get("city", prop.get("municipality", ""))
@@ -128,7 +126,7 @@ class V5PipelineOrchestrator:
                             name = futs[future]
                             self.ctx.errors.append(f"Phase B retry {name}: {e}")
                 except TimeoutError:
-                    for future, name in {f: n for n, f in futs.items() if not f.done()}.items():
+                    for future, name in {f: n for f, n in futs.items() if not f.done()}.items():
                         future.cancel()
                         self.ctx.errors.append(f"Phase B retry {name}: timed out")
 
@@ -282,10 +280,10 @@ class V5PipelineOrchestrator:
                         self.ctx.errors.append(f"K6-K10 {name}: {e}")
                         analysis[name] = {"_error": str(e)}
             except TimeoutError:
-                for future, name in {f: n for n, f in futures.items() if not f.done()}.items():
+                for future, name in {f: n for f, n in futures.items() if not f.done()}.items():
                     future.cancel()
                     self.ctx.errors.append(f"K6-K10 {name}: timed out after 2400s")
-                    analysis[name] = {"_error": f"timed out after 2400s"}
+                    analysis[name] = {"_error": "timed out after 2400s"}
 
         return analysis
 
@@ -348,10 +346,9 @@ class V5PipelineOrchestrator:
         """Ensure moats dict has data — generate from context if empty."""
         if not raw or not raw.get("scores"):
             ask = self.ctx.ask_price or 1
-            sf = self.ctx.building_sf or 1
             hf_mid = ask * 0.45  # conservative hard floor estimate
-            scores = {
-                "license_barrier": {"score": 1, "rationale": f"No documented UST/liquor license — check during DD"},
+            scores: Dict[str, Dict[str, Any]] = {
+                "license_barrier": {"score": 1, "rationale": "No documented UST/liquor license — check during DD"},
                 "tourism_corridor": {"score": 1, "rationale": f"{self.ctx.city} corridor needs verification"},
                 "multi_revenue": {"score": 2, "rationale": f"Property type {self.ctx.property_type} may support multiple tenants"},
                 "zoning_optionality": {"score": 1, "rationale": f"Zoning {self.ctx.zoning} — check redevelopment potential"},
@@ -371,7 +368,6 @@ class V5PipelineOrchestrator:
         """Ensure scenarios dict has 5 scenarios — generate from context if empty."""
         if not raw or len(raw.get("scenarios", [])) < 3:
             ask = self.ctx.ask_price or 1
-            sf = self.ctx.building_sf or 1
             cap_base = max(self.ctx.cap_rate_estimated / 100 if self.ctx.cap_rate_estimated > 1
                           else (self.ctx.cap_rate_estimated or 0.08), 0.06)
             hf_mid = ask * 0.45
@@ -545,8 +541,7 @@ class V5PipelineOrchestrator:
     def _phase_d_dashboard(self, synthesis: SynthesisOutput) -> str:
         """Generate dashboard HTML from SynthesisOutput + LiveContext. Returns URL."""
         try:
-            import subprocess, tempfile
-            from datetime import date
+            import subprocess
 
             # Normalize v5 output into v4 dashboard format
             normalized = self._normalize_for_dashboard(synthesis)
@@ -609,11 +604,11 @@ class V5PipelineOrchestrator:
                 })
             else:
                 scenarios_list.append({
-                    "name": s.get("name", ""), "probability": s.get("probability", 0),
-                    "noi": s.get("noi", 0), "exit_cap": s.get("exit_cap", 0.08),
-                    "exit_value": s.get("exit_value", 0), "moic": s.get("moic", 0),
-                    "description": s.get("description", ""), "triggers": s.get("triggers", []),
-                    "key_assumptions": s.get("key_assumptions", []),
+                    "name": s.get("name", ""), "probability": s.get("probability", 0),  # type: ignore[attr-defined]  # dict-shaped LLM output; hasattr-guarded
+                    "noi": s.get("noi", 0), "exit_cap": s.get("exit_cap", 0.08),  # type: ignore[attr-defined]  # dict-shaped LLM output; hasattr-guarded
+                    "exit_value": s.get("exit_value", 0), "moic": s.get("moic", 0),  # type: ignore[attr-defined]  # dict-shaped LLM output; hasattr-guarded
+                    "description": s.get("description", ""), "triggers": s.get("triggers", []),  # type: ignore[attr-defined]  # dict-shaped LLM output; hasattr-guarded
+                    "key_assumptions": s.get("key_assumptions", []),  # type: ignore[attr-defined]  # dict-shaped LLM output; hasattr-guarded
                 })
         # Fallback: use scenario_narratives if scenarios are empty
         if not scenarios_list and hasattr(scenarios_out, 'scenario_narratives'):
@@ -661,29 +656,29 @@ class V5PipelineOrchestrator:
 
         # Levers (handles both dict and dataclass)
         levers_list = []
-        for l in levers.levers:
-            if hasattr(l, 'name'):
+        for lv in levers.levers:
+            if hasattr(lv, 'name'):
                 levers_list.append({
-                    "name": l.name, "category": l.category, "effort": l.effort,
-                    "noi_impact_pct": l.noi_impact_pct, "timeline_months": l.timeline_months,
-                    "description": l.description,
+                    "name": lv.name, "category": lv.category, "effort": lv.effort,
+                    "noi_impact_pct": lv.noi_impact_pct, "timeline_months": lv.timeline_months,
+                    "description": lv.description,
                 })
             else:
                 levers_list.append({
-                    "name": l.get("name", ""), "category": l.get("category", ""),
-                    "effort": l.get("effort", "MEDIUM"),
-                    "noi_impact_pct": l.get("noi_impact_pct", 0),
-                    "timeline_months": l.get("timeline_months", 0),
-                    "description": l.get("description", ""),
+                    "name": lv.get("name", ""), "category": lv.get("category", ""),  # type: ignore[attr-defined]  # dict-shaped LLM output; hasattr-guarded
+                    "effort": lv.get("effort", "MEDIUM"),  # type: ignore[attr-defined]  # dict-shaped LLM output; hasattr-guarded
+                    "noi_impact_pct": lv.get("noi_impact_pct", 0),  # type: ignore[attr-defined]  # dict-shaped LLM output; hasattr-guarded
+                    "timeline_months": lv.get("timeline_months", 0),  # type: ignore[attr-defined]  # dict-shaped LLM output; hasattr-guarded
+                    "description": lv.get("description", ""),  # type: ignore[attr-defined]  # dict-shaped LLM output; hasattr-guarded
                 })
         rec = levers.recommendation
         recommendation_dict = {
-            "verdict": rec.verdict if hasattr(rec, 'verdict') else rec.get("verdict", "ANALYZE"),
-            "target_offer": rec.target_offer if hasattr(rec, 'target_offer') else rec.get("target_offer", 0),
-            "walk_away": rec.walk_away if hasattr(rec, 'walk_away') else rec.get("walk_away", 0),
-            "confidence": rec.confidence if hasattr(rec, 'confidence') else rec.get("confidence", "MEDIUM"),
-            "key_conditions": rec.key_conditions if hasattr(rec, 'key_conditions') else rec.get("key_conditions", []),
-            "single_biggest_risk": rec.single_biggest_risk if hasattr(rec, 'single_biggest_risk') else rec.get("single_biggest_risk", ""),
+            "verdict": rec.verdict if hasattr(rec, 'verdict') else rec.get("verdict", "ANALYZE"),  # type: ignore[attr-defined]  # dict-shaped LLM output; hasattr-guarded
+            "target_offer": rec.target_offer if hasattr(rec, 'target_offer') else rec.get("target_offer", 0),  # type: ignore[attr-defined]  # dict-shaped LLM output; hasattr-guarded
+            "walk_away": rec.walk_away if hasattr(rec, 'walk_away') else rec.get("walk_away", 0),  # type: ignore[attr-defined]  # dict-shaped LLM output; hasattr-guarded
+            "confidence": rec.confidence if hasattr(rec, 'confidence') else rec.get("confidence", "MEDIUM"),  # type: ignore[attr-defined]  # dict-shaped LLM output; hasattr-guarded
+            "key_conditions": rec.key_conditions if hasattr(rec, 'key_conditions') else rec.get("key_conditions", []),  # type: ignore[attr-defined]  # dict-shaped LLM output; hasattr-guarded
+            "single_biggest_risk": rec.single_biggest_risk if hasattr(rec, 'single_biggest_risk') else rec.get("single_biggest_risk", ""),  # type: ignore[attr-defined]  # dict-shaped LLM output; hasattr-guarded
         }
         offers_list = levers.offers if hasattr(levers, 'offers') else levers.dict().get("offers", []) if hasattr(levers, 'dict') else []
 

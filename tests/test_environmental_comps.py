@@ -1,6 +1,5 @@
 """Test suite for CRE Underwriting environmental + comps modules."""
 
-import pytest
 from cre_underwriting.environmental import assess_location, parse_address
 from cre_underwriting.comps import find_comps, price_per_sf
 from cre_underwriting.utils import parse_city_state, city_to_county

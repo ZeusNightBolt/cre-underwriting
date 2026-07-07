@@ -13,19 +13,18 @@ Usage:
 
 from __future__ import annotations
 
-import json
 import logging
 import re
 import time
 from dataclasses import asdict
 from statistics import median, mean
-from typing import Any, Optional
+from typing import List, Optional
 
 from .models import Comp
-from .utils import parse_city_state, city_slug
+from .utils import parse_city_state
 
 try:
-    from bs4 import BeautifulSoup
+    from bs4 import BeautifulSoup  # noqa: F401 — availability probe
     HAS_BS4 = True
 except ImportError:
     HAS_BS4 = False
@@ -104,7 +103,7 @@ def _loopnet_comps(address: str, property_type: Optional[str] = None,
     # Try Selenium BiDi connection
     try:
         from selenium import webdriver
-        from selenium.webdriver.common.by import By
+        from selenium.webdriver.common.by import By  # noqa: F401 — availability probe
         from selenium.webdriver.firefox.options import Options
     except ImportError:
         logger.warning("Selenium not available for LoopNet comps")
@@ -223,7 +222,7 @@ def _extract_comps_from_text(page_text: str, property_type: Optional[str] = None
       SF + Property Type line (e.g., "21,780 SF Retail")
       Price line (e.g., "$6,000,000")
     """
-    comps = []
+    comps: List[Comp] = []
     
     # Split page into listing blocks using price patterns as boundaries
     # Each listing has a $ price on its own line or inline
@@ -258,7 +257,7 @@ def _extract_comps_from_text(page_text: str, property_type: Optional[str] = None
             
             # Extract address/title - look for text before the price
             before = page_text[max(0, start-200):pm.start()]
-            lines = [l.strip() for l in before.split('\n') if l.strip() and len(l.strip()) > 3]
+            lines = [lv.strip() for lv in before.split('\n') if lv.strip() and len(lv.strip()) > 3]
             # Skip SF lines, cap rate lines, filter headers
             skip_patterns = ['SF ', 'Cap Rate', 'For Sale', 'For Lease', 'Property Types',
                            'Price', 'Size', 'All Filters', 'Results', 'Sort', 'Sign In']
@@ -334,8 +333,6 @@ def _parse_placard_selenium(article_element, property_type: Optional[str] = None
             pass
         sf = _extract_sf_from_text(full_text)
 
-        # Cap rate from text
-        cap_rate = _extract_cap_rate_from_text(full_text)
 
         # Property type detection from text
         detected_type = property_type

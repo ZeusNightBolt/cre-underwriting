@@ -11,11 +11,8 @@ Triple-LLM analysis called at moats, scenarios, legal, and recommendation nodes.
 
 import json
 from datetime import date
-from pathlib import Path
-from typing import Optional
 
 from .models import LiveContext, DealContext
-from .llm_client import get_triple_analysis, call_deepseek
 from .fred_client import get_msa_economics
 from .web_search import (
     search_corridor_intel, search_environmental,

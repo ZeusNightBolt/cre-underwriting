@@ -10,13 +10,12 @@ Usage:
     print(result["verdict"])
 """
 
-import re
 from datetime import datetime, timezone
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 
 from .constants import NJ_HIGH_FLOOD_RISK_COUNTIES, UST_RISK_THRESHOLDS
 from .models import EnvironmentalRisk, EconomicIndicators
-from .utils import parse_address, city_to_county
+from .utils import parse_address
 
 
 # ════════════════════════════════════════════════════════════════
@@ -246,47 +245,72 @@ def _compute_scores(env: EnvironmentalRisk, econ: EconomicIndicators) -> tuple:
     headwind = 0
 
     # Economic tailwinds
-    if econ.population_growth_5yr_pct > 1.5: tailwind += 15
-    elif econ.population_growth_5yr_pct > 0: tailwind += 5
-    if econ.median_household_income > 100_000: tailwind += 20
-    elif econ.median_household_income > 80_000: tailwind += 10
-    if econ.bachelor_degree_pct > 50: tailwind += 15
-    elif econ.bachelor_degree_pct > 40: tailwind += 10
-    if econ.employment_growth_5yr_pct > 3: tailwind += 15
-    elif econ.employment_growth_5yr_pct > 1.5: tailwind += 5
-    if econ.unemployment_rate_pct < 4: tailwind += 10
-    if econ.home_price_appreciation_1yr_pct > 4: tailwind += 10
-    if econ.rental_vacancy_rate_pct < 4: tailwind += 10
+    if econ.population_growth_5yr_pct > 1.5:
+        tailwind += 15
+    elif econ.population_growth_5yr_pct > 0:
+        tailwind += 5
+    if econ.median_household_income > 100_000:
+        tailwind += 20
+    elif econ.median_household_income > 80_000:
+        tailwind += 10
+    if econ.bachelor_degree_pct > 50:
+        tailwind += 15
+    elif econ.bachelor_degree_pct > 40:
+        tailwind += 10
+    if econ.employment_growth_5yr_pct > 3:
+        tailwind += 15
+    elif econ.employment_growth_5yr_pct > 1.5:
+        tailwind += 5
+    if econ.unemployment_rate_pct < 4:
+        tailwind += 10
+    if econ.home_price_appreciation_1yr_pct > 4:
+        tailwind += 10
+    if econ.rental_vacancy_rate_pct < 4:
+        tailwind += 10
 
     # Economic headwinds
-    if econ.population_growth_5yr_pct < 0: headwind += 15
-    if econ.poverty_rate_pct > 12: headwind += 15
-    elif econ.poverty_rate_pct > 8: headwind += 5
-    if econ.unemployment_rate_pct > 5: headwind += 10
-    if econ.employment_growth_5yr_pct < 0.5: headwind += 10
-    if econ.rental_vacancy_rate_pct > 5: headwind += 5
+    if econ.population_growth_5yr_pct < 0:
+        headwind += 15
+    if econ.poverty_rate_pct > 12:
+        headwind += 15
+    elif econ.poverty_rate_pct > 8:
+        headwind += 5
+    if econ.unemployment_rate_pct > 5:
+        headwind += 10
+    if econ.employment_growth_5yr_pct < 0.5:
+        headwind += 10
+    if econ.rental_vacancy_rate_pct > 5:
+        headwind += 5
 
     # Environmental
-    if env.flood_risk_level == "high": headwind += 20
-    elif env.flood_risk_level == "medium": headwind += 10
-    if env.ust_risk == "high": headwind += 15
-    elif env.ust_risk == "medium": headwind += 5
+    if env.flood_risk_level == "high":
+        headwind += 20
+    elif env.flood_risk_level == "medium":
+        headwind += 10
+    if env.ust_risk == "high":
+        headwind += 15
+    elif env.ust_risk == "medium":
+        headwind += 5
 
     return tailwind, headwind
 
 
 def _classify_verdict(tailwind: int, headwind: int) -> str:
     diff = tailwind - headwind
-    if diff >= 50: return "strong_tailwinds"
-    if diff >= 20: return "moderate_tailwinds"
-    if diff >= -10: return "neutral"
-    if diff >= -30: return "headwinds"
+    if diff >= 50:
+        return "strong_tailwinds"
+    if diff >= 20:
+        return "moderate_tailwinds"
+    if diff >= -10:
+        return "neutral"
+    if diff >= -30:
+        return "headwinds"
     return "severe_headwinds"
 
 
 # ── Main API ─────────────────────────────────────────────────
 
-def assess_location(address: str, parcel_id: str = None) -> Dict[str, Any]:
+def assess_location(address: str, parcel_id: Optional[str] = None) -> Dict[str, Any]:
     """Full location assessment: environmental risk + economic indicators."""
     components = parse_address(address)
     county = components.get("county", "")

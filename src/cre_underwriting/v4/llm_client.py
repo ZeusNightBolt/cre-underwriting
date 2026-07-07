@@ -16,7 +16,6 @@ import os
 import subprocess
 import time
 from pathlib import Path
-from typing import Optional
 
 # Paths
 ROUTER = Path.home() / ".hermes/scripts/model_router.py"

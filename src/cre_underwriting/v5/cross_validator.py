@@ -11,8 +11,8 @@ Each K6-K10 node:
   4. Returns merged output with v3 audit trail
 """
 
-from typing import Dict, Any, List, Optional, Tuple
-from .models import LiveContext, Range
+from typing import List, Tuple
+from .models import LiveContext
 
 
 def live_context_to_deal_dict(ctx: LiveContext) -> dict:
@@ -161,7 +161,7 @@ def run_v3_scenarios(ctx: LiveContext) -> dict:
     try:
         # _build_scenarios expects (deal_data, levers, valuation)
         # We pass empty levers/valuation since it handles defaults internally
-        from cre_underwriting.orchestrator_v3 import CREPipelineV3
+        from cre_underwriting.orchestrator_v3 import CREPipelineV3  # type: ignore[attr-defined]  # FIXME: class does not exist (module has EnhancedPipelineOrchestrator); except-fallback below is the live path
 
         # Create a minimal pipeline instance just for _build_scenarios
         class _MinimalPipeline(CREPipelineV3):
@@ -198,7 +198,7 @@ def run_v3_scenarios(ctx: LiveContext) -> dict:
             "purchase_price": purchase,
             "hard_floor_mid": int(purchase * 0.45),
         }
-    except Exception as e:
+    except Exception:
         # Fallback: simple formula-driven scenarios
         cap = max(ctx.cap_rate_estimated / 100 if ctx.cap_rate_estimated > 1
                   else (ctx.cap_rate_estimated or 0.08), 0.06)
@@ -243,14 +243,14 @@ def run_v3_levers(ctx: LiveContext) -> dict:
     result = lever_analysis(deal, purchase)
 
     levers_list = []
-    for l in result.get("levers", [])[:7]:
+    for lv in result.get("levers", [])[:7]:
         levers_list.append({
-            "name": l.get("name", ""),
-            "category": l.get("category", "Revenue"),
-            "effort": str(l.get("effort", "MEDIUM")).upper(),
-            "noi_impact_pct": float(l.get("noi_impact_pct", l.get("revenue_impact_annual", 0) / 1000)),
-            "timeline_months": int(l.get("timeline_months", 12)),
-            "description": l.get("description", ""),
+            "name": lv.get("name", ""),
+            "category": lv.get("category", "Revenue"),
+            "effort": str(lv.get("effort", "MEDIUM")).upper(),
+            "noi_impact_pct": float(lv.get("noi_impact_pct", lv.get("revenue_impact_annual", 0) / 1000)),
+            "timeline_months": int(lv.get("timeline_months", 12)),
+            "description": lv.get("description", ""),
         })
 
     rec = result.get("recommendation", {})

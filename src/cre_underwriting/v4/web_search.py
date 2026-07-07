@@ -11,14 +11,12 @@ import time
 import urllib.request
 import urllib.error
 import urllib.parse
-from typing import Optional
 
 
 def _brave_search(query: str, count: int = 10,
                   max_retries: int = 3, timeout: int = 30) -> list:
     """Search via Brave Search API. Returns list of {title, url, description}."""
     import gzip
-    import io
 
     api_key = os.environ.get("BRAVE_API_KEY", "")
     if not api_key:
@@ -49,7 +47,7 @@ def _brave_search(query: str, count: int = 10,
                     })
                 return results
         except (urllib.error.URLError, urllib.error.HTTPError,
-                json.JSONDecodeError, gzip.BadGzipFile) as e:
+                json.JSONDecodeError, gzip.BadGzipFile):
             if attempt < max_retries - 1:
                 time.sleep(2 ** attempt + 1)
     return []

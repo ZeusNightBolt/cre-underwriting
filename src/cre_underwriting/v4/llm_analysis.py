@@ -96,7 +96,7 @@ def analyze_moats(dc: DealContext, ctx: LiveContext) -> dict:
     # Income data
     income = deal.get("income", {})
     if income:
-        prompt_parts.append(f"\n## Deal Financials")
+        prompt_parts.append("\n## Deal Financials")
         prompt_parts.append(f"- NOI: ${income.get('noi_estimated', income.get('noi', 0)) or 0:,.0f}")
         prompt_parts.append(f"- Cap Rate: {income.get('cap_rate_est_pct', income.get('cap_rate', 0)) or 0}%")
         prompt_parts.append(f"- Rent Range: {income.get('rent_range_per_sf', income.get('rent_range', 'N/A'))}")
@@ -106,7 +106,7 @@ def analyze_moats(dc: DealContext, ctx: LiveContext) -> dict:
     if assessment:
         prompt_parts.append(f"- Tax Assessment: ${assessment:,}")
 
-    prompt_parts.append(f"""
+    prompt_parts.append("""
 ## Task
 
 Score this property on ALL 8 moat dimensions below (0-3 each):
@@ -126,21 +126,21 @@ After scoring, classify the deal: WIDE MOAT (≥19), NARROW MOAT (≥12), or NO 
 
 Return ONLY valid JSON:
 ```json
-{{
-  "scores": {{
-    "license_barrier": {{"score": 0, "rationale": "..."}},
-    "tourism_corridor": {{"score": 0, "rationale": "..."}},
-    "multi_revenue": {{"score": 0, "rationale": "..."}},
-    "zoning_optionality": {{"score": 0, "rationale": "..."}},
-    "rent_gap": {{"score": 0, "rationale": "..."}},
-    "brand_value": {{"score": 0, "rationale": "..."}},
-    "asset_stack": {{"score": 0, "rationale": "..."}},
-    "seller_asymmetry": {{"score": 0, "rationale": "..."}}
-  }},
+{
+  "scores": {
+    "license_barrier": {"score": 0, "rationale": "..."},
+    "tourism_corridor": {"score": 0, "rationale": "..."},
+    "multi_revenue": {"score": 0, "rationale": "..."},
+    "zoning_optionality": {"score": 0, "rationale": "..."},
+    "rent_gap": {"score": 0, "rationale": "..."},
+    "brand_value": {"score": 0, "rationale": "..."},
+    "asset_stack": {"score": 0, "rationale": "..."},
+    "seller_asymmetry": {"score": 0, "rationale": "..."}
+  },
   "total": 0,
   "classification": "NO MOAT",
   "verdict": "..."
-}}
+}
 ```""")
 
     full_prompt = "\n".join(prompt_parts)
@@ -227,7 +227,7 @@ def analyze_scenarios(dc: DealContext, ctx: LiveContext) -> dict:
 
     # Local economy
     prompt_parts.extend([
-        f"\n## Local Economy",
+        "\n## Local Economy",
         f"- MSA: {ctx.msa_name or 'N/A'}",
         f"- HPI 1yr: {ctx.msa_hpi_1yr_pct or 'N/A'}%",
         f"- Median HHI: ${ctx.county_median_income or 0:,}",
@@ -461,7 +461,7 @@ environmental_liability_estimate: dollar amount for worst-case remediation (0 if
 def analyze_levers(dc: DealContext, ctx: LiveContext) -> dict:
     """Triple-LLM business levers + recommendation analysis."""
     deal = dc.deal_data
-    prop = deal.get("property", {})
+    deal.get("property", {})
     income = deal.get("income", {})
 
     prompt_parts = [
@@ -486,7 +486,7 @@ def analyze_levers(dc: DealContext, ctx: LiveContext) -> dict:
 
     # Local economy
     prompt_parts.extend([
-        f"\n## Local Economy",
+        "\n## Local Economy",
         f"- HPI 1yr: {ctx.msa_hpi_1yr_pct or 'N/A'}%",
         f"- Median HHI: ${ctx.county_median_income or 0:,}",
         f"- Unemployment: {ctx.county_unemployment_pct or 'N/A'}%",

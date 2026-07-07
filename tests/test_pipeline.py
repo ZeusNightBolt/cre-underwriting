@@ -5,7 +5,6 @@ import pytest
 from pathlib import Path
 
 from cre_underwriting.pipeline import PipelineOrchestrator
-from cre_underwriting.convexity import from_json
 
 FIXTURES = Path(__file__).parent / "fixtures"
 

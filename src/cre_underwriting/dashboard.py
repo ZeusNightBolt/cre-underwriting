@@ -47,7 +47,7 @@ def _money(val, fallback="—"):
         return fallback
 
 
-def generate_dashboard(data: dict, title: str = None) -> str:
+def generate_dashboard(data: dict, title: Optional[str] = None) -> str:
     """
     Generate a complete analytical HTML dashboard from pipeline output.
 
@@ -134,11 +134,11 @@ def generate_dashboard(data: dict, title: str = None) -> str:
     tabs.append(("recommendation", "RECOMMENDATION", _build_recommendation(data, verdict)))
 
     tab_buttons = "\n".join(
-        f'<button class="tab-btn{f" active" if i==0 else ""}" onclick="showTab(\'{tid}\')">{label}</button>'
+        f'<button class="tab-btn{" active" if i==0 else ""}" onclick="showTab(\'{tid}\')">{label}</button>'
         for i, (tid, label, _) in enumerate(tabs)
     )
     tab_contents = "\n".join(
-        f'<div class="tab-content{f" active" if i==0 else ""}" id="{tid}">{content}</div>'
+        f'<div class="tab-content{" active" if i==0 else ""}" id="{tid}">{content}</div>'
         for i, (tid, _, content) in enumerate(tabs)
     )
 
@@ -758,10 +758,14 @@ def _build_scenarios(data):
 
 def _scenario_class(name):
     n = name.lower()
-    if "worst" in n: return "card-worst"
-    if "base" in n or "status quo" in n: return "card-base"
-    if "phase 3" in n or "strategic" in n or "moonshot" in n: return "card-moonshot"
-    if "best" in n or "optimize" in n or "phase 1" in n or "phase 2" in n: return "card-best"
+    if "worst" in n:
+        return "card-worst"
+    if "base" in n or "status quo" in n:
+        return "card-base"
+    if "phase 3" in n or "strategic" in n or "moonshot" in n:
+        return "card-moonshot"
+    if "best" in n or "optimize" in n or "phase 1" in n or "phase 2" in n:
+        return "card-best"
     return ""
 
 

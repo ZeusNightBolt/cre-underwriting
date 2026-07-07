@@ -14,13 +14,12 @@ Pillars:
 """
 import json
 from datetime import date
-from pathlib import Path
-from typing import Dict, Any, Optional
 
 from .valuation import valuation_triangulation
 from .financial_levers import build_pro_forma, lever_analysis
 from .convexity import ConvexityEngine, from_json as convexity_from_json
 from .enhanced import EnhancedAnalyzer
+from typing import Any, Dict, List, Optional
 
 
 class EnhancedPipelineOrchestrator:
@@ -36,14 +35,14 @@ class EnhancedPipelineOrchestrator:
     def __init__(self):
         self.convexity = ConvexityEngine()
     
-    def run(self, deal_path: str, env_path: str = None, comps_path: str = None) -> dict:
+    def run(self, deal_path: str, env_path: Optional[str] = None, comps_path: Optional[str] = None) -> dict:
         """Run full 8-pillar pipeline on a deal analysis JSON."""
         with open(deal_path) as f:
             deal_data = json.load(f)
         
         return self.run_dict(deal_data, env_path, comps_path)
     
-    def run_dict(self, deal_data: dict, env_path: str = None, comps_path: str = None) -> dict:
+    def run_dict(self, deal_data: dict, env_path: Optional[str] = None, comps_path: Optional[str] = None) -> dict:
         """Run full pipeline from in-memory dict."""
         prop = deal_data.get("property", {})
         address = prop.get("address", deal_data.get("deal", {}).get("address", ""))
@@ -213,13 +212,12 @@ class EnhancedPipelineOrchestrator:
             "hard_floor_mid": min(valuation["hard_asset_value_mid"], ask_price),
         }
     
-    def _build_frontier_data(self, deal_data: dict, base_price: float, valuation: dict = None) -> list:
+    def _build_frontier_data(self, deal_data: dict, base_price: float, valuation: Optional[dict] = None) -> dict:
         """Build effective frontier data points across a range of purchase prices."""
-        from copy import deepcopy
         
         prop = deal_data.get("property", {})
         ask = prop.get("price", 0) or 0
-        scenarios_raw = deal_data.get("scenarios", {})
+        deal_data.get("scenarios", {})
         
         # Use provided valuation or recompute, with fallback to fixture's hard_asset_floor
         if valuation and valuation.get("hard_asset_value_low", 0) > 0:
@@ -230,7 +228,7 @@ class EnhancedPipelineOrchestrator:
             if hard_low <= 0:
                 hard_low = deal_data.get("hard_asset_floor", {}).get("low", 0)
         
-        points = []
+        points: List[Dict[str, Any]] = []
         for price in range(int(ask * 0.50), int(ask * 1.05) + 25000, 25000):
             # Worst = hard asset floor as % of purchase (capped at price)
             worst_floor = min(hard_low, price)

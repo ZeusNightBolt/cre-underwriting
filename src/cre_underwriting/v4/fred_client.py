@@ -12,8 +12,7 @@ MSA mappings are curated for the CRE pipeline's target markets (NJ/PA/SC/NY).
 
 import os
 import functools
-from typing import Optional
-from datetime import datetime
+from typing import Any, Dict, Optional
 
 try:
     from fredapi import Fred
@@ -137,7 +136,7 @@ def get_msa_economics(city: str, state: str) -> dict:
         return _empty_economics("MSA not found for %s, %s" % (city, state))
 
     series = MSA_SERIES.get(msa, {})
-    result = {"msa_name": msa, "source": "FRED (St. Louis Fed)", "data_freshness": ""}
+    result: Dict[str, Any] = {"msa_name": msa, "source": "FRED (St. Louis Fed)", "data_freshness": ""}
     data_dates = []
 
     # HPI

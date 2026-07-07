@@ -9,7 +9,7 @@ and cre_environmental.py with different field names and completeness.
 """
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict
 
 
 # ════════════════════════════════════════════════════════════════
