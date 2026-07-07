@@ -63,12 +63,11 @@ LICENSE_PATTERNS = [
         "note": "Value highly state-dependent. SC: relatively affordable. NJ: scarce and expensive."
     },
     {
-        "type": "Gas Station License / UST",
-        "keywords": ["gas station", "fuel", "underground storage tank", "ust",
-                      "convenience store with gas", "filling station"],
+        "type": "Operating Gas Station",
+        "keywords": ["gas station", "fuel station", "filling station", "convenience store with gas"],
         "typical_value": {"default": (50000, 200000)},
         "transferable_default": True,
-        "note": "UST permits, environmental compliance, brand agreements."
+        "note": "Operating gas station with active permits, fuel contracts, UST compliance."
     },
     {
         "type": "Distribution License",
@@ -221,9 +220,10 @@ def estimate_equipment_value(sf: int, property_type: str, building_class: str,
     }
 
 
-def detect_licenses(listing_text: str, state: str = "SC") -> List[Dict[str, Any]]:
+def detect_licenses(listing_text: str, state: str = None) -> List[Dict[str, Any]]:
     """Detect transferable licenses from listing description text."""
     import re
+    state = (state or "NJ").upper()
     text_lower = listing_text.lower()
     found = []
     
@@ -268,7 +268,7 @@ def valuation_triangulation(deal: Dict[str, Any]) -> Dict[str, Any]:
     prop = deal.get("property", {})
     listing_text = deal.get("description", prop.get("description", ""))
     
-    # Extract fields
+    # Extract fields with safe fallbacks
     sf = prop.get("sf", 0) or 0
     lot_acres = float(prop.get("lot_acres", 0) or 0)
     property_type = prop.get("property_type", "Retail")
@@ -276,9 +276,9 @@ def valuation_triangulation(deal: Dict[str, Any]) -> Dict[str, Any]:
     year_built = prop.get("year_built", 1970) or 1970
     year_renovated = prop.get("year_renovated") or None
     zoning = prop.get("zoning", "C2") or "C2"
-    state = prop.get("state", "SC")
+    state = prop.get("state", "NJ")
     ask_price = prop.get("price", 0) or 0
-    submarket = deal.get("market", {}).get("submarket", "")
+    submarket = deal.get("market", {}).get("submarket", "") or deal.get("submarket", "") or ""
     
     # Description: check top-level, property, and raw listing text
     listing_text = (
@@ -287,12 +287,15 @@ def valuation_triangulation(deal: Dict[str, Any]) -> Dict[str, Any]:
         deal.get("raw_text_snippet", "")
     )
     
+    # Extract state for license detection
+    detected_state = prop.get("state", "NJ") or "NJ"
+    
     # Run each component
     land = estimate_land_value(lot_acres, zoning, submarket, submarket)
     building = estimate_building_value(sf, property_type, building_class, 
                                         year_built, year_renovated)
     equipment = estimate_equipment_value(sf, property_type, building_class, listing_text or "")
-    licenses = detect_licenses(listing_text or "", state)
+    licenses = detect_licenses(listing_text or "", detected_state)
     
     license_total = sum(l["value_high"] for l in licenses)
     

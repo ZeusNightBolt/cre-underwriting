@@ -23,7 +23,7 @@ from .constants import (
 )
 from .models import (
     ConvexityResult, DealInput, DivergenceOutput, FrontierPoint,
-    PWEVOutput, Scenario, VerdictOutput,
+    PWEVOutput, Scenario, VerdictOutput, extract_pricing,
 )
 
 
@@ -198,19 +198,27 @@ class ConvexityEngine:
     # ── Effective Frontier ──────────────────────────────────
 
     def compute_effective_frontier(self, deal: DealInput) -> FrontierPoint:
-        """Classify where the deal sits on the effective frontier."""
+        """Classify where the deal sits on the effective frontier.
+
+        FRONTIER_ZONES thresholds are expressed as worst-case LOSS (% of
+        capital that can be lost). divergence.worst_case_pct_capital is the
+        % of capital RETAINED in the worst case (effective_worst / capital),
+        so convert explicitly: loss_pct = 100 - retained_pct. Comparing the
+        retained % against the loss thresholds inverted the classification
+        (highest-loss deals were labeled 'Pursue aggressively').
+        """
         div = self.compute_divergence(deal)
-        x = div.worst_case_pct_capital
+        loss_pct = 100.0 - div.worst_case_pct_capital
         y = div.best_case_moic
 
         if y >= FRONTIER_ZONES["pursue_aggressively"]["best_min_moic"]:
-            zone = ("Pursue aggressively" if x < FRONTIER_ZONES["pursue_aggressively"]["worst_max_pct"]
+            zone = ("Pursue aggressively" if loss_pct < FRONTIER_ZONES["pursue_aggressively"]["worst_max_pct"]
                     else "Acceptable selectively")
         else:
-            zone = ("Pass unless portfolio reason" if x < FRONTIER_ZONES["pass_portfolio"]["worst_max_pct"]
+            zone = ("Pass unless portfolio reason" if loss_pct < FRONTIER_ZONES["pass_portfolio"]["worst_max_pct"]
                     else "Walk away")
 
-        return FrontierPoint(x=x, y=y, zone=zone)
+        return FrontierPoint(x=loss_pct, y=y, zone=zone)
 
     # ── Verdict generation ──────────────────────────────────
 
@@ -248,7 +256,7 @@ class ConvexityEngine:
                                deal.hard_floor_mid * OFFERS.walk_multiplier)
                 verdict = "CONDITIONAL"
                 reasoning.append(f"Frontier: {frontier.zone} — "
-                               f"worst {frontier.x:.0f}%, best MOIC {frontier.y:.2f}x. "
+                               f"worst-case loss {frontier.x:.0f}%, best MOIC {frontier.y:.2f}x. "
                                f"BUT convexity {div.convexity_verdict.lower()} "
                                f"(ratio {div.convexity_ratio:.2f}).")
                 reasoning.append(f"CONDITIONAL — pursue at ≤${target_offer:,.0f}, "
@@ -259,7 +267,7 @@ class ConvexityEngine:
                     reasoning=reasoning,
                     risk_reward_summary=(
                         f"Risk: ${deal.capital_invested:,.0f}, "
-                        f"worst {frontier.x:.0f}% of capital. "
+                        f"worst-case loss {frontier.x:.0f}% of capital. "
                         f"Best MOIC {frontier.y:.2f}x. "
                         f"Convexity {div.convexity_ratio:.2f} ({div.convexity_verdict}). "
                         f"Conditional — requires price discipline."))
@@ -356,8 +364,18 @@ def from_json(data: dict) -> ConvexityResult:
         "valuations": {"probability_weighted_ev": {"weights": {...}}}
     }
     """
-    hf = data.get("hard_asset_floor", data.get("hard_floor", {}))
-    prop = data.get("property", {})
+    pricing = data.get("pricing", {})
+    deal = data.get("deal", {})
+
+    # Shared schema normalization (pricing.* vs hard_asset_floor/hard_floor)
+    norm = extract_pricing(data)
+    ask_price = norm["ask_price"]
+    purchase_price = data.get("purchase_price", 0) or pricing.get("ask", 0) or ask_price
+    capital_invested = data.get("capital_invested", 0) or purchase_price
+
+    hard_mid = norm["hard_floor_mid"]
+    hard_low = norm["hard_floor_low"]
+    hard_high = norm["hard_floor_high"]
 
     prob_weighted = data.get("valuations", {}).get("probability_weighted_ev", {})
     weights = prob_weighted.get("weights", {})
@@ -394,13 +412,24 @@ def from_json(data: dict) -> ConvexityResult:
             elif name == selected_best:
                 prob = default_prob["best"]
             else:
-                prob = 0.0
+                # Phase 3 / non-core scenario — split remaining probability
+                prob = 0.0  # Fallback; will be normalized if non-zero values exist
 
             scenarios.append(Scenario(
                 name=name, probability=prob,
                 revenue=s.get("gross_rent", 0), cogs=0, labor=0,
                 other_opex=s.get("expenses", 0), noi=s.get("noi"),
                 exit_value=s.get("value", 0), moic=s.get("moic_5yr")))
+
+        # Normalize: distribute remaining probability to all scenarios with value > 0
+        total_prob = sum(s.probability for s in scenarios)
+        if total_prob < 1.0:
+            eligible = [s for s in scenarios if s.probability == 0.0 and s.exit_value > 0]
+            if eligible:
+                remaining = 1.0 - total_prob
+                per_scenario = remaining / len(eligible)
+                for s in eligible:
+                    s.probability = per_scenario
     else:
         for s in raw_scenarios:
             scenarios.append(Scenario(
@@ -410,15 +439,15 @@ def from_json(data: dict) -> ConvexityResult:
                 exit_value=s.get("exit_value", 0), moic=s.get("moic")))
 
     deal = DealInput(
-        ask_price=prop.get("price", data.get("ask_price", 0)),
-        purchase_price=data.get("purchase_price", prop.get("price", data.get("ask_price", 0))),
-        hard_floor_low=hf.get("low", 0), hard_floor_mid=hf.get("mid", 0),
-        hard_floor_high=hf.get("high", 0),
+        ask_price=ask_price,
+        purchase_price=purchase_price,
+        hard_floor_low=hard_low, hard_floor_mid=hard_mid,
+        hard_floor_high=hard_high,
         real_estate_value=data.get("real_estate_value", 0),
         license_value=data.get("license_value", 0),
         equipment_value=data.get("equipment_value", 0),
         scenarios=scenarios, exit_year=data.get("exit_year", 5),
-        capital_invested=data.get("capital_invested"))
+        capital_invested=capital_invested)
 
     return ConvexityEngine().analyze(deal)
 

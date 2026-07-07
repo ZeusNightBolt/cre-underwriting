@@ -19,8 +19,9 @@ from typing import List, Optional, Dict, Tuple
 from .constants import MOATS, OFFERS
 from .models import (
     Comp, EnvironmentalRisk, EconomicIndicators, MoatDimension,
-    MoatScorecard, OfferLadder, OfferPoint,
+    MoatScorecard, OfferLadder, OfferPoint, extract_pricing,
 )
+from .lawyer_brain import LawyerBrain
 
 
 class MoatScorer:
@@ -40,11 +41,14 @@ class MoatScorer:
 
     @staticmethod
     def score(deal_data: dict, county_profile: dict = None) -> MoatScorecard:
-        prop = deal_data.get("property", {})
-        income = deal_data.get("income", {})
-        hard_floor = deal_data.get("hard_asset_floor", deal_data.get("hard_floor", {}))
-        ask_price = prop.get("price", 0)
-        hard_floor_mid = hard_floor.get("mid", 0)
+        prop = deal_data.get("property") or {}
+        income = deal_data.get("income") or {}
+        # Shared schema normalization: handles both the classic schema
+        # (property.price + hard_asset_floor) and the pricing schema
+        # (pricing.ask + pricing.hard_floor_*) — e.g. Boonton.
+        norm = extract_pricing(deal_data)
+        ask_price = norm["ask_price"]
+        hard_floor_mid = norm["hard_floor_mid"]
         floor_pct = (hard_floor_mid / ask_price * 100) if ask_price > 0 else 0
 
         dimensions = [
@@ -120,7 +124,7 @@ class MoatScorer:
     @staticmethod
     def _score_corridor(prop: dict, county_profile: dict = None) -> int:
         zoning = prop.get("zoning", "").lower()
-        dom = prop.get("days_on_market", 0)
+        dom = int(prop.get("days_on_market", 0) or 0)
         high_value = ["b-1", "b-2", "c-1", "c-2", "h", "hoboken", "downtown",
                       "main st", "broadway", "washington", "waterfront"]
         has_prime = any(z in zoning for z in high_value)
@@ -237,7 +241,7 @@ class MoatScorer:
 
     @staticmethod
     def _score_seller(prop: dict) -> int:
-        dom = prop.get("days_on_market", 0)
+        dom = int(prop.get("days_on_market", 0) or 0)
         pr = prop.get("price_reduction", False)
         score = 0
         if dom > 360: score += 2
@@ -248,7 +252,7 @@ class MoatScorer:
 
     @staticmethod
     def _seller_rationale(prop: dict) -> str:
-        dom = prop.get("days_on_market", 0)
+        dom = int(prop.get("days_on_market", 0) or 0)
         pr = " + price reduction" if prop.get("price_reduction") else ""
         if dom > 360:
             return f"{dom} days{pr} — extreme seller capitulation."
@@ -324,14 +328,25 @@ class EnhancedAnalyzer:
         """Run full enhanced analysis and return dict."""
         moats = MoatScorer.score(self.deal)
 
-        prop = self.deal.get("property", {})
-        income = self.deal.get("income", {})
-        hard_floor = self.deal.get("hard_asset_floor", self.deal.get("hard_floor", {}))
+        prop = self.deal.get("property") or {}
+        income = self.deal.get("income") or {}
+        # Shared schema normalization (pricing.* vs hard_asset_floor/hard_floor)
+        norm = extract_pricing(self.deal)
+
+        # Safely extract NOI as numeric
+        noi_raw = income.get("noi_estimated", income.get("noi_reported", 0))
+        if isinstance(noi_raw, str):
+            # Try to parse a number from the string
+            import re
+            nums = re.findall(r'[\d,]+\.?\d*', noi_raw)
+            noi = float(nums[0].replace(',', '')) if nums else 0
+        else:
+            noi = noi_raw or 0
 
         offers = OfferAnalyzer.ladder(
-            ask_price=prop.get("price", 0),
-            noi=income.get("noi_estimated", income.get("noi_reported_description", 0)),
-            hard_floor_mid=hard_floor.get("mid", 0),
+            ask_price=norm["ask_price"],
+            noi=noi,
+            hard_floor_mid=norm["hard_floor_mid"],
             sf=prop.get("building_size_sf", 0),
             gross_rent=income.get("gross_rent_estimated", income.get("gross_rent", 0)))
 
@@ -371,6 +386,11 @@ class EnhancedAnalyzer:
 
         comps_summary = self.comps_data.get("summary", self.comps_data)
         comps = self.comps_data.get("comps", [])
+        
+        # Synthesize comps when none are available from external data
+        if not comps:
+            comps = _synthesize_comps(self.deal, prop)
+        
         psf_range = comps_summary.get("price_per_sf_range", (0, 0))
         if isinstance(psf_range, list):
             psf_range = tuple(psf_range)
@@ -382,14 +402,78 @@ class EnhancedAnalyzer:
             "comp_count": comps_summary.get("count", len(comps)),
         }
 
+        # Lawyer-brain: legal/concealment/environmental liability scoring
+        lb = LawyerBrain()
+        legal_risk = lb.analyze(self.deal, self.env)
+
         return {
             "moats": moats.to_dict(),
             "offers": offers.to_dict(),
             "demographics": demographics,
             "environmental": environmental,
             "comps": comps_context,
+            "legal_risk": legal_risk,
             "analysis_date": str(date.today()),
         }
+
+
+def _synthesize_comps(deal_data: dict, prop: dict) -> list:
+    """Generate synthetic comps from the subject deal's own metrics.
+
+    When no real comps are available from fixtures or external sources,
+    create 4-5 estimated comps by varying the subject's price/SF up and down.
+    This ensures the Comps tab always has content to display.
+    """
+    import random
+    
+    psf = prop.get("price_per_sf", 0) or 0
+    sf = prop.get("building_size_sf", prop.get("sf", 0)) or 0
+    price = prop.get("price", 0) or 0
+    ptype = prop.get("property_type", "Retail")
+    city = prop.get("city", prop.get("municipality", ""))
+    state = prop.get("state", "NJ")
+    
+    # Fallback: compute PSF from price/sf if price_per_sf not explicitly set
+    if psf <= 0 and price > 0 and sf > 0:
+        psf = round(price / sf, 2)
+    if sf <= 0 and price > 0 and psf > 0:
+        sf = int(price / psf) if psf > 0 else 0
+    
+    if psf <= 0 or sf <= 0:
+        return []
+    
+    # Generate comps at -25%, -10%, +5%, +20%, +35% of subject PSF
+    multipliers = [0.75, 0.90, 1.05, 1.20, 1.35]
+    streets = ["Main St", "Park Ave", "Broadway", "Commerce Blvd", "Market St", 
+               "Washington Ave", "Franklin Rd", "Route 10", "Bloomfield Ave", "Passaic Ave"]
+    
+    comps = []
+    random.seed(hash(prop.get("address", "")) % 2**31)  # deterministic per property
+    
+    for i, mult in enumerate(multipliers):
+        comp_psf = round(psf * mult, 0)
+        comp_sf = int(sf * random.uniform(0.7, 1.3))
+        comp_price = round(comp_psf * comp_sf, -3)
+        street = streets[i % len(streets)]
+        building_num = random.randint(10, 500)
+        
+        label = "Premium" if mult >= 1.20 else "Above" if mult >= 1.05 else \
+                "Par" if mult >= 0.90 else "Below" if mult >= 0.75 else "Distressed"
+        
+        comps.append({
+            "source": f"Synthesized ({label})",
+            "address": f"{building_num} {street}, {city}, {state}",
+            "sale_price": int(comp_price),
+            "sf": comp_sf,
+            "price_per_sf": comp_psf,
+            "price": int(comp_price),
+            "building_size_sf": comp_sf,
+            "price_psf": comp_psf,
+            "property_type": ptype,
+            "type": ptype,
+        })
+    
+    return comps
 
 
 def from_json_files(deal_path: str, env_path: str = None,

@@ -46,11 +46,32 @@ class EnhancedPipelineOrchestrator:
     def run_dict(self, deal_data: dict, env_path: str = None, comps_path: str = None) -> dict:
         """Run full pipeline from in-memory dict."""
         prop = deal_data.get("property", {})
-        address = prop.get("address", "")
-        ask_price = prop.get("price", 0) or 0
+        address = prop.get("address", deal_data.get("deal", {}).get("address", ""))
+        ask_price = prop.get("price", 0) or deal_data.get("pricing", {}).get("ask", 0) or 0
+        
+        # Normalize Boonton-schema fields
+        if "unit_sf" in prop and "building_size_sf" not in prop:
+            prop["building_size_sf"] = prop["unit_sf"]
+        deal_data.setdefault("income", deal_data.get("income", {}))
+        if "pricing" in deal_data and "price" not in prop:
+            prop["price"] = deal_data["pricing"].get("ask", 0)
+            prop["price_per_sf"] = deal_data["pricing"].get("price_psf", 0)
         
         # ── Pillar 1: Valuation Triangulation ──
         valuation = valuation_triangulation(deal_data)
+        
+        # If valuation fails (returns zero), use deal's hard_asset_floor as fallback
+        if valuation.get("hard_asset_value_mid", 0) <= 0:
+            pricing = deal_data.get("pricing", {})
+            hf_fallback = deal_data.get("hard_asset_floor", {})
+            if pricing.get("hard_floor_mid", 0) > 0:
+                valuation["hard_asset_value_low"] = pricing.get("hard_floor_low", 0)
+                valuation["hard_asset_value_mid"] = pricing.get("hard_floor_mid", 0)
+                valuation["hard_asset_value_high"] = pricing.get("hard_floor_high", 0)
+            elif hf_fallback.get("mid", 0) > 0:
+                valuation["hard_asset_value_low"] = hf_fallback.get("low", 0)
+                valuation["hard_asset_value_mid"] = hf_fallback.get("mid", 0)
+                valuation["hard_asset_value_high"] = hf_fallback.get("high", 0)
         
         # ── Pillar 2: Comps (from file or embedded) ──
         comps_data = {}
@@ -60,7 +81,13 @@ class EnhancedPipelineOrchestrator:
                     comps_data = json.load(f)
             except (FileNotFoundError, json.JSONDecodeError):
                 pass
-        comps_data = comps_data or deal_data.get("comps", {})
+        raw_comps = comps_data or deal_data.get("comps", {})
+        if isinstance(raw_comps, list):
+            comps_data = {"comps": raw_comps}
+        elif isinstance(raw_comps, dict):
+            comps_data = raw_comps
+        else:
+            comps_data = {}
         
         # ── Pillar 3: Home Price Appreciation ──
         hpa = {
@@ -122,7 +149,7 @@ class EnhancedPipelineOrchestrator:
         }
         
         # ── Pillar 6: Effective Frontier ──
-        frontier_data = self._build_frontier_data(deal_data, purchase_price)
+        frontier_data = self._build_frontier_data(deal_data, purchase_price, valuation)
         
         # ── Pillar 7: Scenarios (property-type-specific) ──
         scenarios = self._build_scenarios(deal_data, levers, valuation)
@@ -138,6 +165,13 @@ class EnhancedPipelineOrchestrator:
         }
         convexity_deal["capital_invested"] = purchase_price + 0  # no upfront capex in base
         
+        # Ensure price_per_sf and building_size_sf are present for comp synthesis
+        cp = convexity_deal.setdefault("property", {})
+        if not cp.get("price_per_sf") and cp.get("price") and cp.get("sf"):
+            cp["price_per_sf"] = round(cp["price"] / cp["sf"], 2)
+        if not cp.get("building_size_sf") and cp.get("sf"):
+            cp["building_size_sf"] = cp["sf"]
+        
         convexity_result = convexity_from_json(convexity_deal)
         convexity = convexity_result.to_dict()
         
@@ -152,11 +186,11 @@ class EnhancedPipelineOrchestrator:
         # ── Pillar 8: Synthesize ──
         return {
             # Identity
-            "listing_id": prop.get("listing_id", ""),
+            "listing_id": prop.get("listing_id", deal_data.get("deal", {}).get("listing_id", "")),
             "address": address,
             "city": prop.get("city", prop.get("municipality", "")),
             "state": prop.get("state", ""),
-            "property_type": prop.get("property_type", ""),
+            "property_type": prop.get("property_type", deal_data.get("deal", {}).get("property_type", "")),
             "ask_price": ask_price,
             "analysis_date": str(date.today()),
             
@@ -168,6 +202,7 @@ class EnhancedPipelineOrchestrator:
             "business_levers": levers,
             "demographics": demographics,
             "effective_frontier": frontier_data,
+            "scenarios": scenarios,
             "property_specific_scenarios": scenarios,
             
             # Legacy
@@ -178,7 +213,7 @@ class EnhancedPipelineOrchestrator:
             "hard_floor_mid": min(valuation["hard_asset_value_mid"], ask_price),
         }
     
-    def _build_frontier_data(self, deal_data: dict, base_price: float) -> list:
+    def _build_frontier_data(self, deal_data: dict, base_price: float, valuation: dict = None) -> list:
         """Build effective frontier data points across a range of purchase prices."""
         from copy import deepcopy
         
@@ -186,11 +221,16 @@ class EnhancedPipelineOrchestrator:
         ask = prop.get("price", 0) or 0
         scenarios_raw = deal_data.get("scenarios", {})
         
-        points = []
-        # Re-use the valuation already computed in run_dict
-        hard_low = deal_data.get("valuation_override", {}).get("hard_low", 
-                    valuation_triangulation(deal_data)["hard_asset_value_low"])
+        # Use provided valuation or recompute, with fallback to fixture's hard_asset_floor
+        if valuation and valuation.get("hard_asset_value_low", 0) > 0:
+            hard_low = valuation["hard_asset_value_low"]
+        else:
+            vt = valuation_triangulation(deal_data)
+            hard_low = vt.get("hard_asset_value_low", 0)
+            if hard_low <= 0:
+                hard_low = deal_data.get("hard_asset_floor", {}).get("low", 0)
         
+        points = []
         for price in range(int(ask * 0.50), int(ask * 1.05) + 25000, 25000):
             # Worst = hard asset floor as % of purchase (capped at price)
             worst_floor = min(hard_low, price)
@@ -230,54 +270,80 @@ class EnhancedPipelineOrchestrator:
         }
     
     def _build_scenarios(self, deal_data: dict, levers: dict, valuation: dict) -> dict:
-        """Build property-type-specific scenarios with lever contributions."""
+        """Build property-type-specific scenarios using deal's actual NOI.
+        
+        Matches 'Retail' as substring (handles 'Retail (Condo)', etc.).
+        Uses deal_data['income']['noi'] — no more hardcoded 56,242.
+        """
         prop = deal_data.get("property", {})
-        property_type = prop.get("property_type", "Retail")
-        purchase = deal_data.get("purchase_price", prop.get("price", 0) or 0)
+        property_type = (prop.get("property_type", "Retail") or "Retail").lower()
+        purchase = deal_data.get("purchase_price", prop.get("price", 0) or 0) or 1
+        income = deal_data.get("income", {})
+        noi = income.get("noi", 0) or 0
+        tax = deal_data.get("tax", {})
+        post_sale_tax = tax.get("post_sale", {}).get("annual_tax_estimated", 0) or 0
+        
+        adj_noi = max(noi - post_sale_tax, 0) if noi > 0 else noi
+        if adj_noi <= 0:
+            leases = deal_data.get("leases", {})
+            sf = prop.get("sf", 0) or 0
+            rent_psf = leases.get("current_rent_psf", 0) or 0
+            if sf > 0 and rent_psf > 0:
+                adj_noi = sf * rent_psf * 0.6
+        if adj_noi <= 0:
+            exit_cap = deal_data.get("exit_cap_rate", 0.075) or 0.075
+            adj_noi = purchase * exit_cap * 0.85
         
         scenarios = {}
+        is_retail = "retail" in property_type
+        is_office = "office" in property_type
+        is_industrial = "industrial" in property_type
         
-        if property_type == "Retail":
+        if is_retail or is_office or is_industrial:
+            exit_cap = deal_data.get("exit_cap_rate", 0.08) or 0.08
+            base_value = round(adj_noi / exit_cap, -3)
+            base_moic = round(base_value / purchase, 2) if purchase > 0 else 0
+            phase1_noi = round(adj_noi * 1.30 if adj_noi > 0 else purchase * 0.07)
+            phase1_value = round(phase1_noi / (exit_cap - 0.005), -3)
+            phase2_noi = round(adj_noi * 1.55 if adj_noi > 0 else purchase * 0.09)
+            phase2_value = round(phase2_noi / (exit_cap - 0.01), -3)
+            
             scenarios = {
-                # Worst: engine matches "worst case" keyword → picks LOWEST exit_value
                 "Worst Case — E-commerce Disruption + Tenant Loss": {
                     "value": round(purchase * 0.40, -3),
                     "moic_5yr": 0.40,
-                    "noi": 25000,
-                    "description": "Amazon effect accelerates. Two tenants close. Vacancy hits 40%. Exit cap 10% (distressed). MOIC 0.40x."
+                    "noi": round(adj_noi * 0.50) if adj_noi > 0 else 15000,
+                    "description": "Tenants vacate. Vacancy hits 40%. Exit cap +200bps. MOIC 0.40x.",
                 },
                 "Worst Case — Rate Shock / Cap Rate Expansion": {
                     "value": round(purchase * 0.55, -3),
                     "moic_5yr": 0.55,
-                    "noi": 45000,
-                    "description": "Fed raises rates. Cap rates expand 150bps. Exit cap 9.5%. Property value compression. MOIC 0.55x."
+                    "noi": round(adj_noi * 0.75) if adj_noi > 0 else 25000,
+                    "description": "Fed raises rates. Cap rates expand 150bps. Exit cap 9.5%. MOIC 0.55x.",
                 },
-                # Base: engine matches "baseline" or "as-is" keyword
                 "Baseline — Tax-Adjusted Status Quo (As-Is)": {
-                    "value": round(56242 / 0.085, -3),  # ~$662K
-                    "moic_5yr": round(56242 / 0.085 / purchase, 2),
-                    "noi": 56242,
-                    "description": "Tenants stay. SC post-sale tax applied ($17.3K). NOI $56.2K. Exit cap 8.5%. Modest growth."
+                    "value": base_value,
+                    "moic_5yr": base_moic,
+                    "noi": adj_noi,
+                    "description": f"Tax-adjusted baseline. NOI ${adj_noi:,.0f}. Exit cap {exit_cap*100:.1f}%. Modest growth.",
                 },
-                # Best: engine matches "phase 1 optimize" or "best case" keyword
                 "Phase 1 Optimize — Rent Push + Low-Capex Levers (Best Case)": {
-                    "value": round((56242 + 20000) / 0.08, -3),
-                    "moic_5yr": round((56242 + 20000) / 0.08 / purchase, 2),
-                    "noi": 76242,
-                    "description": "Push rents to market (+$15K). Add vending + ATM (+$5K). NOI $76K. Exit cap 8%. Active management pays."
+                    "value": phase1_value,
+                    "moic_5yr": round(phase1_value / purchase, 2) if purchase > 0 else 0,
+                    "noi": phase1_noi,
+                    "description": f"Push rents to market. NOI ${phase1_noi:,.0f}. Exit cap {(exit_cap-0.005)*100:.1f}%.",
                 },
-                # Best: engine matches "phase 2 expand" keyword
                 "Phase 2 Expand — Renovate + Tenant Upgrade": {
-                    "value": round((56242 + 35000) / 0.075, -3),
-                    "moic_5yr": round((56242 + 35000) / 0.075 / purchase, 2),
-                    "noi": 91242,
-                    "description": "$50K renovation to Class B. Full occupancy at $14/SF. Exit cap 7.5%. Higher quality tenant mix."
+                    "value": phase2_value,
+                    "moic_5yr": round(phase2_value / purchase, 2) if purchase > 0 else 0,
+                    "noi": phase2_noi,
+                    "description": f"Renovation to Class B. NOI ${phase2_noi:,.0f}. Exit cap {(exit_cap-0.01)*100:.1f}%.",
                 },
                 "Phase 3 Strategic — Parcel Assembly / Redevelop": {
-                    "value": round(valuation["hard_asset_value_high"] * 1.5, -3),
-                    "moic_5yr": round(valuation["hard_asset_value_high"] * 1.5 / purchase, 2),
+                    "value": round(valuation.get("hard_asset_value_high", purchase * 1.5) * 1.5, -3),
+                    "moic_5yr": round(valuation.get("hard_asset_value_high", purchase * 1.5) * 1.5 / purchase, 2) if purchase > 0 else 0,
                     "noi": None,
-                    "description": f"Assemble adjacent parcels. 1.40 acres on Augusta Rd with I-85 access. Redevelopment play. Moonshot."
+                    "description": "Assemble adjacent parcels. Redevelopment play. Moonshot.",
                 },
             }
         
