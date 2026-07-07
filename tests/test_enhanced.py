@@ -138,3 +138,31 @@ class TestEnhancedAnalyzer:
         result = analyzer.analyze()
         assert result["demographics"]["population"] == 863000
         assert result["environmental"]["ust_risk"] == "medium"
+
+
+class TestPricingSchemaOffers:
+    """H20: pricing-schema deals (pricing.ask + pricing.hard_floor_*) must not
+    silently produce $0 offer ladders and 0-scored asset-stack moats."""
+
+    @pytest.fixture
+    def boonton_deal(self):
+        with open(FIXTURES / "boonton_40453341_analysis.json") as f:
+            return json.load(f)
+
+    def test_offer_ladder_nonzero_for_pricing_schema(self, boonton_deal):
+        """Every offer point must be priced from pricing.ask / pricing.hard_floor_mid."""
+        result = EnhancedAnalyzer(boonton_deal).analyze()
+        offers = result["offers"]
+
+        assert offers["ask_price"] == 289_000
+        assert offers["target_low"] > 0
+        assert offers["walk_away"] > 0
+        assert len(offers["points"]) > 0
+        for point in offers["points"]:
+            assert point["price"] > 0, f"Zero-dollar offer point: {point}"
+
+    def test_asset_stack_moat_sees_pricing_schema_floor(self, boonton_deal):
+        """Hard floor $168K vs ask $289K (58%) must register in the asset-stack moat."""
+        moats = MoatScorer.score(boonton_deal)
+        asset = next(d for d in moats.dimensions if d.name == "Asset Stack Coverage")
+        assert asset.score > 0

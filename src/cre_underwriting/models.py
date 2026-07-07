@@ -9,7 +9,35 @@ and cre_environmental.py with different field names and completeness.
 """
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict
+
+
+# ════════════════════════════════════════════════════════════════
+# Schema normalization
+# ════════════════════════════════════════════════════════════════
+
+def extract_pricing(data: dict) -> dict:
+    """Normalize ask price and hard-floor values across deal JSON schemas.
+
+    Two schemas exist in the wild:
+      - classic:  property.price + hard_asset_floor/hard_floor.{low,mid,high}
+      - pricing:  pricing.ask + pricing.hard_floor_{low,mid,high}  (e.g. Boonton)
+
+    Returns a dict with keys: ask_price, hard_floor_low, hard_floor_mid,
+    hard_floor_high. Missing values default to 0. This is the single shared
+    fallback chain — use it instead of reading the raw dict directly.
+    """
+    pricing = data.get("pricing") or {}
+    prop = data.get("property") or {}
+    hf = data.get("hard_asset_floor", data.get("hard_floor")) or {}
+
+    ask_price = prop.get("price", 0) or pricing.get("ask", 0) or data.get("ask_price", 0) or 0
+    return {
+        "ask_price": ask_price,
+        "hard_floor_low": pricing.get("hard_floor_low") or hf.get("low", 0) or 0,
+        "hard_floor_mid": pricing.get("hard_floor_mid") or hf.get("mid", 0) or 0,
+        "hard_floor_high": pricing.get("hard_floor_high") or hf.get("high", 0) or 0,
+    }
 
 
 # ════════════════════════════════════════════════════════════════
@@ -107,7 +135,7 @@ class PWEVOutput:
 @dataclass
 class FrontierPoint:
     """A point on the effective frontier chart."""
-    x: float     # worst case as % of capital
+    x: float     # worst-case LOSS as % of capital (100 - worst_case_pct_capital)
     y: float     # best case 5-year MOIC
     zone: str    # "Pursue aggressively", "Acceptable selectively", etc.
 
@@ -141,8 +169,12 @@ class ConvexityResult:
                 "convexity_ratio": round(self.divergence.convexity_ratio, 2),
                 "convexity_verdict": self.divergence.convexity_verdict,
                 "worst_scenario_value": self.divergence.worst_scenario_value,
+                "hard_floor_mid": self.divergence.hard_floor_mid,
                 "effective_worst": self.divergence.effective_worst,
+                "base_scenario_value": self.divergence.base_scenario_value,
+                "best_scenario_value": self.divergence.best_scenario_value,
                 "worst_case_pct_capital": round(self.divergence.worst_case_pct_capital, 1),
+                "best_case_moic": round(self.divergence.best_case_moic, 2),
                 "best_case_moic_5yr": round(self.divergence.best_case_moic, 2),
                 "risk_reward_ratio": round(self.divergence.risk_reward_ratio, 1),
             },

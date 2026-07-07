@@ -1,7 +1,6 @@
 """Test suite for CRE Underwriting convexity engine."""
 
 import json
-import math
 import pytest
 from pathlib import Path
 
@@ -116,3 +115,53 @@ class TestConvexityEngine:
 
         assert div.convexity_ratio >= 2.5
         assert div.convexity_verdict == "HIGH"
+
+
+class TestEffectiveFrontier:
+    """Effective frontier zone classification (H19: was inverted)."""
+
+    @staticmethod
+    def _deal(hard_floor_mid, worst_exit, best_exit):
+        return DealInput(
+            ask_price=100_000, purchase_price=100_000,
+            hard_floor_low=hard_floor_mid * 0.9,
+            hard_floor_mid=hard_floor_mid,
+            hard_floor_high=hard_floor_mid * 1.1,
+            scenarios=[
+                Scenario(name="Worst Case", probability=0.2, exit_value=worst_exit),
+                Scenario(name="Baseline", probability=0.5, exit_value=110_000),
+                Scenario(name="Phase 2 Expand", probability=0.3, exit_value=best_exit),
+            ])
+
+    def test_low_loss_deal_ranks_safer_than_high_loss_deal(self):
+        """A deal that risks 10% of capital must classify better than one risking 80%."""
+        engine = ConvexityEngine()
+
+        # Safe: effective worst $90K on $100K capital → 10% worst-case loss
+        safe = engine.compute_effective_frontier(
+            self._deal(hard_floor_mid=90_000, worst_exit=85_000, best_exit=260_000))
+        # Risky: effective worst $20K on $100K capital → 80% worst-case loss
+        risky = engine.compute_effective_frontier(
+            self._deal(hard_floor_mid=20_000, worst_exit=20_000, best_exit=260_000))
+
+        # x is worst-case LOSS as % of capital — safe deal loses less
+        assert safe.x == pytest.approx(10.0)
+        assert risky.x == pytest.approx(80.0)
+        assert safe.x < risky.x
+
+        # Both clear the MOIC bar (2.6x); only the low-loss deal may be
+        # pursued aggressively. Before the fix these were swapped.
+        assert safe.zone == "Pursue aggressively"
+        assert risky.zone == "Acceptable selectively"
+
+    def test_low_moic_zones_use_loss_not_recovery(self):
+        """Below the MOIC bar: small loss → 'Pass unless portfolio reason', large loss → 'Walk away'."""
+        engine = ConvexityEngine()
+
+        small_loss = engine.compute_effective_frontier(
+            self._deal(hard_floor_mid=90_000, worst_exit=85_000, best_exit=150_000))
+        large_loss = engine.compute_effective_frontier(
+            self._deal(hard_floor_mid=20_000, worst_exit=20_000, best_exit=150_000))
+
+        assert small_loss.zone == "Pass unless portfolio reason"
+        assert large_loss.zone == "Walk away"

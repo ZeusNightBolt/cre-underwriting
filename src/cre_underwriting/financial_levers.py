@@ -136,7 +136,7 @@ def get_lever_catalog(property_type: str) -> List[Dict]:
     return catalogs.get(property_type, RETAIL_LEVERS)
 
 
-def build_pro_forma(deal: Dict[str, Any], purchase_price: float = None) -> Dict[str, Any]:
+def build_pro_forma(deal: Dict[str, Any], purchase_price: Optional[float] = None) -> Dict[str, Any]:
     """
     Build 5-year pro forma:
     - Gross rent (starting + annual escalation)
@@ -223,14 +223,14 @@ def build_pro_forma(deal: Dict[str, Any], purchase_price: float = None) -> Dict[
     }
 
 
-def lever_analysis(deal: Dict[str, Any], purchase_price: float = None) -> Dict[str, Any]:
+def lever_analysis(deal: Dict[str, Any], purchase_price: Optional[float] = None) -> Dict[str, Any]:
     """
     Analyze applicable business levers. Score each by: revenue potential, 
     capex required, zoning risk, timeline, probability.
     """
     prop = deal.get("property", {})
     property_type = prop.get("property_type", "Retail")
-    listing_text = deal.get("description", prop.get("description", "")) or ""
+    deal.get("description", prop.get("description", "")) or ""
     
     catalog = get_lever_catalog(property_type)
     
@@ -261,7 +261,7 @@ def lever_analysis(deal: Dict[str, Any], purchase_price: float = None) -> Dict[s
         })
     
     # Sort by score descending
-    levers.sort(key=lambda l: l["score"], reverse=True)
+    levers.sort(key=lambda lv: lv["score"], reverse=True)
     
     top_levers = levers[:5]
     
@@ -271,11 +271,11 @@ def lever_analysis(deal: Dict[str, Any], purchase_price: float = None) -> Dict[s
         "top_levers": top_levers,
         "all_levers": levers,
         "recommended_phasing": {
-            "phase_1_immediate": [l for l in levers if l["capex"] < 5000 and l["timeline_months"] <= 3],
-            "phase_2_medium": [l for l in levers if 5000 <= l["capex"] <= 50000],
-            "phase_3_structural": [l for l in levers if l["capex"] > 50000 or l["timeline_months"] > 6],
+            "phase_1_immediate": [lv for lv in levers if lv["capex"] < 5000 and lv["timeline_months"] <= 3],
+            "phase_2_medium": [lv for lv in levers if 5000 <= lv["capex"] <= 50000],
+            "phase_3_structural": [lv for lv in levers if lv["capex"] > 50000 or lv["timeline_months"] > 6],
         },
-        "total_potential_revenue_uplift": sum(l["revenue_impact_annual"] for l in levers),
+        "total_potential_revenue_uplift": sum(lv["revenue_impact_annual"] for lv in levers),
     }
 
 
@@ -295,5 +295,5 @@ if __name__ == "__main__":
     
     levers = lever_analysis(test_deal)
     print("\n=== TOP LEVERS ===")
-    for l in levers["top_levers"]:
-        print(f"  {l['name']}: +${l['revenue_impact_annual']:,}/yr | Capex ${l.get('capex',0):,} | Score {l['score']}")
+    for lv in levers["top_levers"]:
+        print(f"  {lv['name']}: +${lv['revenue_impact_annual']:,}/yr | Capex ${lv.get('capex',0):,} | Score {lv['score']}")

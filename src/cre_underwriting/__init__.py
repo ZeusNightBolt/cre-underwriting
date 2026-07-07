@@ -20,13 +20,16 @@ from .models import (
     MoatDimension, MoatScorecard, OfferPoint, OfferLadder,
     EnvironmentalRisk, EconomicIndicators, Comp,
 )
+from .enhanced import MoatScorer, OfferAnalyzer, EnhancedAnalyzer
+from .orchestrator_v3 import EnhancedPipelineOrchestrator
+from .lawyer_brain import LawyerBrain
 
 __version__ = "1.0.0"
 __all__ = [
     "ConvexityEngine", "MoatScorer", "OfferAnalyzer", "EnhancedAnalyzer",
-    "PipelineOrchestrator", "generate_dashboard",
+    "PipelineOrchestrator", "EnhancedPipelineOrchestrator", "generate_dashboard",
     "from_json", "from_json_files",
-    "assess_location", "find_comps",
+    "assess_location", "find_comps", "LawyerBrain",
     "Scenario", "DealInput", "ConvexityResult",
     "DivergenceOutput", "PWEVOutput", "FrontierPoint", "VerdictOutput",
     "MoatDimension", "MoatScorecard", "OfferPoint", "OfferLadder",
