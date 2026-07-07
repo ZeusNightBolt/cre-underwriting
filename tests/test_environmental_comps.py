@@ -71,35 +71,43 @@ class TestEnvironmental:
 
 
 class TestComps:
-    """Comparable sales engine."""
+    """Comparable sales engine.
+
+    All tests run with live=False so they never launch Firefox or hit
+    LoopNet — the suite must stay hermetic (it runs in CI on every push).
+    """
 
     def test_find_comps_returns_structure(self):
-        result = find_comps("123 Main St, Princeton, NJ 08540")
+        result = find_comps("123 Main St, Princeton, NJ 08540", live=False)
         assert "comps" in result
         assert "summary" in result
 
     def test_summary_has_source_status(self):
         """Phase 2 bugfix: summary should include source_status and data_quality_warning."""
-        result = find_comps("123 Main St, Princeton, NJ 08540")
+        result = find_comps("123 Main St, Princeton, NJ 08540", live=False)
         summary = result["summary"]
         assert "source_status" in summary
         assert "data_quality_warning" in summary
         assert isinstance(summary["source_status"], dict)
 
     def test_all_sources_tracked(self):
-        result = find_comps("123 Main St, Princeton, NJ 08540")
+        result = find_comps("123 Main St, Princeton, NJ 08540", live=False)
         sources = result["summary"]["source_status"]
         assert set(sources.keys()) == {"loopnet", "njactb"}
 
     def test_no_comps_warning(self):
-        """When no comps found, data_quality_warning should exist (value depends on Firefox availability)."""
-        result = find_comps("123 Main St, Princeton, NJ 08540")
+        """Offline mode is deterministic: no comps → data_quality_warning is set."""
+        result = find_comps("123 Main St, Princeton, NJ 08540", live=False)
         warning = result["summary"]["data_quality_warning"]
-        # Warning may be None if LoopNet BiDi successfully finds results
-        # Structure check: the field must exist
-        assert "data_quality_warning" in result["summary"]
-        if warning is not None:
-            assert "comps" in warning.lower() or "loopnet" in warning.lower()
+        assert warning is not None
+        assert "comps" in warning.lower() or "loopnet" in warning.lower()
+
+    def test_offline_env_var(self, monkeypatch):
+        """CRE_OFFLINE=1 forces offline mode even when live=True."""
+        monkeypatch.setenv("CRE_OFFLINE", "1")
+        result = find_comps("123 Main St, Princeton, NJ 08540")
+        assert result["summary"]["count"] == 0
+        assert result["summary"]["source_status"] == {"loopnet": False, "njactb": False}
 
     def test_price_per_sf_empty(self):
         result = price_per_sf([])

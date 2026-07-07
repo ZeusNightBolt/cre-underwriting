@@ -833,12 +833,11 @@ def _build_offers(offers, ask_price):
         psf = p.get("price_per_sf", p.get("price_psf", 0))
         cap = p.get("cap_rate_pct", p.get("cap_rate_implied", 0))
         grm = p.get("gross_rent_multiplier", p.get("grn_adj", 0))
-        coc = p.get("cash_on_cash_pct", p.get("coc", 0))
         cls = "best" if "TARGET" in label or "AGGRESSIVE" in label else "walk" if "WALK" in label else ""
-        rows.append(f'<tr class="{cls}"><td>{label or "—"}</td><td>{_money(price)}</td><td>${psf:,.0f}</td><td>{cap:.1f}%</td><td>{grm:.1f}x</td><td>{coc:.1f}%</td></tr>')
+        rows.append(f'<tr class="{cls}"><td>{label or "—"}</td><td>{_money(price)}</td><td>${psf:,.0f}</td><td>{cap:.1f}%</td><td>{grm:.1f}x</td></tr>')
 
     table = f'''<table class="offer-table">
-<thead><tr><th>Label</th><th>Price</th><th>$/SF</th><th>Cap Rate</th><th>GRM</th><th>CoC</th></tr></thead>
+<thead><tr><th>Label</th><th>Price</th><th>$/SF</th><th>Cap Rate</th><th>GRM</th></tr></thead>
 <tbody>{"".join(rows)}</tbody>
 </table>'''
     parts.append(table)

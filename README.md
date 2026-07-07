@@ -15,7 +15,7 @@ Analyzes CRE deals through a 5-scenario convexity framework:
 - **Offer Ladder** — 5-point price staircase anchored from hard floor with cap rates at each level
 - **4-Method Triangulation** — Asset-based, income-based, revenue multiple, probability-weighted EV
 - **Environmental & Demographic Risk** — FEMA flood, UST, county economic profiles
-- **Comparable Sales** — Zillow integration (LoopNet + NJ ACTB stubbed)
+- **Comparable Sales** — LoopNet Firefox BiDi scraping (primary), NJ county assessor stubbed
 
 ## Quick Start
 
@@ -66,7 +66,7 @@ src/cre_underwriting/
 ├── models.py            # Shared dataclasses
 ├── convexity.py         # ConvexityEngine, divergence, PWEV, verdict
 ├── enhanced.py          # MoatScorer, OfferAnalyzer, EnhancedAnalyzer
-├── comps.py             # Comparable sales (Zillow)
+├── comps.py             # Comparable sales (LoopNet primary, NJ ACTB stubbed)
 ├── environmental.py     # Environmental + economic risk (NJ counties)
 ├── pipeline.py          # PipelineOrchestrator
 scripts/

@@ -147,7 +147,13 @@ class ConvexityEngine:
         worst_pct = (effective_worst / capital * 100) if capital > 0 else 100
         best_moic = best.moic if best.moic else (best_value / capital if capital > 0 else 1.0)
 
-        rr_denom = worst_pct if worst_pct > 0 else 1
+        # Risk/reward = best MOIC per unit of capital AT RISK (worst-case
+        # loss fraction), not per unit retained. worst_pct is the % of
+        # capital RETAINED, so the loss fraction is (100 - worst_pct).
+        # Clamp the denominator at 1% so a zero-loss deal reports a large
+        # finite ratio instead of dividing by zero.
+        loss_pct = 100.0 - worst_pct
+        rr_denom = loss_pct if loss_pct > 0 else 1.0
         risk_reward = best_moic / (rr_denom / 100)
 
         return DivergenceOutput(
@@ -402,7 +408,13 @@ def from_json(data: dict) -> ConvexityResult:
 
         selected_worst = min(worst_candidates, key=lambda x: x[1].get("value", 0))[0] if worst_candidates else None
         selected_base = base_candidates[0][0] if base_candidates else None
-        selected_best = max(best_candidates, key=lambda x: x[1].get("value", 0))[0] if best_candidates else None
+        # PWEV weighting selects the REALISTIC best candidate (lowest-value
+        # match, e.g. "Phase 1 Optimize"), per docs/convexity-engine.md §3:
+        # "PWEV rooted in realistic expectations (Phase 1 Optimize at 25%
+        # weight) while convexity uses maximum upside (Phase 2 Expand) for
+        # the tail." Divergence/convexity independently pick the max-value
+        # best inside the engine, so this only affects PWEV probabilities.
+        selected_best = min(best_candidates, key=lambda x: x[1].get("value", 0))[0] if best_candidates else None
 
         for name, s, name_lower in entries:
             if name == selected_worst:
