@@ -1,0 +1,13 @@
+{
+  "max_turns": 120,
+  "auto_compress_pct": 80,
+  "retry_max": 5,
+  "specialized_skills": [
+    "loopnet-scraper",
+    "listing-parser",
+    "deal-underwriter",
+    "comp-finder",
+    "environmental-assessor",
+    "cre-dashboard-builder"
+  ]
+}
