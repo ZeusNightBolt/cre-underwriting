@@ -229,7 +229,7 @@ class MoatScorer:
     def _score_brand(deal_data: dict) -> int:
         prop = deal_data.get("property", {})
         year_built = prop.get("year_built", 0)
-        years = 2026 - year_built if year_built > 0 else 0
+        years = date.today().year - year_built if year_built > 0 else 0
         desc = (deal_data.get("description", prop.get("description", ""))).lower()
         keywords = ["established", "family-owned", "franchise", "long-term",
                    "decades", "renowned", "institution"]
@@ -288,7 +288,7 @@ class MoatScorer:
 
 class OfferAnalyzer:
     """
-    Generate a multi-price offer ladder with cap rates, GRM, and cash-on-cash.
+    Generate a multi-price offer ladder with cap rates and GRM.
 
     Uses the unified OFFERS thresholds from constants.py.
     """
@@ -311,15 +311,17 @@ class OfferAnalyzer:
 
         points = []
         for price, label in prices:
+            # NOTE: no cash-on-cash here — true CoC needs financing params
+            # (LTV, rate, amortization) that the deal schema doesn't carry.
+            # The previous cash_on_cash_pct field was a mislabeled duplicate
+            # of the all-cash cap rate and has been dropped.
             cap_rate = (noi / price * 100) if price > 0 else 0
             grm = (price / gross_rent) if gross_rent > 0 else 0
-            coc = (noi / price * 100) if price > 0 else 0
             psf = (price / sf) if sf > 0 else 0
             points.append(OfferPoint(
                 price=price, price_per_sf=round(psf, 0),
                 cap_rate_pct=round(cap_rate, 2),
-                gross_rent_multiplier=round(grm, 1),
-                cash_on_cash_pct=round(coc, 1), label=label))
+                gross_rent_multiplier=round(grm, 1), label=label))
 
         return OfferLadder(
             points=points, target_low=target_low, target_high=target_high,
@@ -413,11 +415,7 @@ class EnhancedAnalyzer:
 
         comps_summary = self.comps_data.get("summary", self.comps_data)
         comps = self.comps_data.get("comps", [])
-        
-        # Synthesize comps when none are available from external data
-        if not comps:
-            comps = _synthesize_comps(self.deal, prop)
-        
+
         psf_range = comps_summary.get("price_per_sf_range", (0, 0))
         if isinstance(psf_range, list):
             psf_range = tuple(psf_range)
@@ -428,6 +426,11 @@ class EnhancedAnalyzer:
             "subject_psf": prop.get("price_per_sf", 0),
             "comp_count": comps_summary.get("count", len(comps)),
         }
+        if not comps:
+            # Never fabricate comps: an empty comp set must surface as an
+            # explicit data gap, not synthetic listings derived from the
+            # subject's own ask price (circular validation of the ask).
+            comps_context["warning"] = "NO COMPS AVAILABLE — comp-based price validation skipped"
 
         # Lawyer-brain: legal/concealment/environmental liability scoring
         lb = LawyerBrain()
@@ -442,65 +445,6 @@ class EnhancedAnalyzer:
             "legal_risk": legal_risk,
             "analysis_date": str(date.today()),
         }
-
-
-def _synthesize_comps(deal_data: dict, prop: dict) -> list:
-    """Generate synthetic comps from the subject deal's own metrics.
-
-    When no real comps are available from fixtures or external sources,
-    create 4-5 estimated comps by varying the subject's price/SF up and down.
-    This ensures the Comps tab always has content to display.
-    """
-    import random
-    
-    psf = prop.get("price_per_sf", 0) or 0
-    sf = prop.get("building_size_sf", prop.get("sf", 0)) or 0
-    price = prop.get("price", 0) or 0
-    ptype = prop.get("property_type", "Retail")
-    city = prop.get("city", prop.get("municipality", ""))
-    state = prop.get("state", "NJ")
-    
-    # Fallback: compute PSF from price/sf if price_per_sf not explicitly set
-    if psf <= 0 and price > 0 and sf > 0:
-        psf = round(price / sf, 2)
-    if sf <= 0 and price > 0 and psf > 0:
-        sf = int(price / psf) if psf > 0 else 0
-    
-    if psf <= 0 or sf <= 0:
-        return []
-    
-    # Generate comps at -25%, -10%, +5%, +20%, +35% of subject PSF
-    multipliers = [0.75, 0.90, 1.05, 1.20, 1.35]
-    streets = ["Main St", "Park Ave", "Broadway", "Commerce Blvd", "Market St", 
-               "Washington Ave", "Franklin Rd", "Route 10", "Bloomfield Ave", "Passaic Ave"]
-    
-    comps = []
-    random.seed(hash(prop.get("address", "")) % 2**31)  # deterministic per property
-    
-    for i, mult in enumerate(multipliers):
-        comp_psf = round(psf * mult, 0)
-        comp_sf = int(sf * random.uniform(0.7, 1.3))
-        comp_price = round(comp_psf * comp_sf, -3)
-        street = streets[i % len(streets)]
-        building_num = random.randint(10, 500)
-        
-        label = "Premium" if mult >= 1.20 else "Above" if mult >= 1.05 else \
-                "Par" if mult >= 0.90 else "Below" if mult >= 0.75 else "Distressed"
-        
-        comps.append({
-            "source": f"Synthesized ({label})",
-            "address": f"{building_num} {street}, {city}, {state}",
-            "sale_price": int(comp_price),
-            "sf": comp_sf,
-            "price_per_sf": comp_psf,
-            "price": int(comp_price),
-            "building_size_sf": comp_sf,
-            "price_psf": comp_psf,
-            "property_type": ptype,
-            "type": ptype,
-        })
-    
-    return comps
 
 
 def from_json_files(deal_path: str, env_path: Optional[str] = None,

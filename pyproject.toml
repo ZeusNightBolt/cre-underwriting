@@ -50,6 +50,9 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+# src/ layout: let pytest import the package from a bare checkout
+# (no editable install required).
+pythonpath = ["src"]
 
 [tool.ruff]
 line-length = 100

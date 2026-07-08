@@ -1,6 +1,7 @@
 """Test suite for CRE Underwriting convexity engine."""
 
 import json
+import math
 import pytest
 from pathlib import Path
 
@@ -165,3 +166,125 @@ class TestEffectiveFrontier:
 
         assert small_loss.zone == "Pass unless portfolio reason"
         assert large_loss.zone == "Walk away"
+
+
+class TestRiskReward:
+    """risk_reward_ratio direction: reward per unit of capital AT RISK."""
+
+    @staticmethod
+    def _deal(hard_floor_mid, worst_exit, best_moic):
+        return DealInput(
+            ask_price=100_000, purchase_price=100_000,
+            hard_floor_low=hard_floor_mid * 0.9,
+            hard_floor_mid=hard_floor_mid,
+            hard_floor_high=hard_floor_mid * 1.1,
+            scenarios=[
+                Scenario(name="Worst Case", probability=0.2, exit_value=worst_exit),
+                Scenario(name="Baseline", probability=0.5, exit_value=110_000),
+                Scenario(name="Phase 2 Expand", probability=0.3,
+                         exit_value=best_moic * 100_000, moic=best_moic),
+            ])
+
+    def test_safer_deal_scores_higher_risk_reward(self):
+        """Same best MOIC: the deal risking 10% must out-score the one risking 90%."""
+        engine = ConvexityEngine()
+
+        # Retains 90% in the worst case → 10% of capital at risk
+        safe = engine.compute_divergence(self._deal(90_000, 90_000, 3.0))
+        # Retains 10% in the worst case → 90% of capital at risk
+        risky = engine.compute_divergence(self._deal(10_000, 10_000, 3.0))
+
+        # 3.0 MOIC / 0.10 at risk = 30x;  3.0 / 0.90 = 3.33x
+        assert safe.risk_reward_ratio == pytest.approx(30.0, rel=0.01)
+        assert risky.risk_reward_ratio == pytest.approx(3.33, rel=0.01)
+        assert safe.risk_reward_ratio > risky.risk_reward_ratio
+
+    def test_zero_loss_deal_finite_ratio(self):
+        """A deal whose effective worst retains all capital must not divide by zero."""
+        engine = ConvexityEngine()
+        div = engine.compute_divergence(self._deal(100_000, 100_000, 3.0))
+        assert math.isfinite(div.risk_reward_ratio)
+        assert div.risk_reward_ratio > 0
+
+
+class TestVerdictGates:
+    """Verdict gate branching per docs/convexity-engine.md gate table."""
+
+    @staticmethod
+    def _deal(hard_floor_mid, worst_exit, base_exit, best_exit):
+        return DealInput(
+            ask_price=100_000, purchase_price=100_000,
+            hard_floor_low=hard_floor_mid * 0.9,
+            hard_floor_mid=hard_floor_mid,
+            hard_floor_high=hard_floor_mid * 1.1,
+            scenarios=[
+                Scenario(name="Worst Case", probability=0.2, exit_value=worst_exit),
+                Scenario(name="Baseline", probability=0.5, exit_value=base_exit),
+                Scenario(name="Phase 2 Expand", probability=0.3, exit_value=best_exit),
+            ])
+
+    def test_gate1_negative_convexity_passes(self):
+        """Gate 1: convexity ratio < 1.0 → PASS."""
+        engine = ConvexityEngine()
+        # Upside 10K, downside 60K → ratio ~0.17
+        v = engine.generate_verdict(self._deal(30_000, 30_000, 90_000, 100_000))
+        assert v.verdict == "PASS"
+        assert v.target_offer is None
+
+    def test_gate3_pursue_aggressively(self):
+        """Gate 3: 'Pursue aggressively' zone → PURSUE AT $X with offer numbers."""
+        engine = ConvexityEngine()
+        # Loss 10%, best MOIC 2.6x+, strong convexity
+        v = engine.generate_verdict(self._deal(90_000, 85_000, 110_000, 270_000))
+        assert v.zone == "Pursue aggressively"
+        assert v.verdict.startswith("PURSUE AT ")
+        assert v.target_offer and v.target_offer > 0
+        assert v.walk_away and v.walk_away > 0
+
+    def test_gate2_walk_away_with_marginal_convexity_is_conditional(self):
+        """Gate 2: 'Walk away' zone but ratio >= 1.0 → CONDITIONAL with price discipline."""
+        engine = ConvexityEngine()
+        # Loss 80% (fails zone), best MOIC below bar, but upside >= downside
+        v = engine.generate_verdict(self._deal(20_000, 20_000, 60_000, 110_000))
+        assert v.zone == "Walk away"
+        assert v.verdict == "CONDITIONAL"
+        assert v.target_offer and v.target_offer > 0
+
+    def test_gate4_acceptable_selectively_is_conditional(self):
+        """Gate 4: 'Acceptable selectively' zone → CONDITIONAL."""
+        engine = ConvexityEngine()
+        # Loss 80% but best MOIC clears the bar; positive convexity
+        v = engine.generate_verdict(self._deal(20_000, 20_000, 60_000, 270_000))
+        assert v.zone == "Acceptable selectively"
+        assert v.verdict == "CONDITIONAL"
+
+
+class TestPWEVWeighting:
+    """from_json PWEV weighting: 'best' weight goes to the realistic
+    (lowest-value) best candidate — Phase 1 Optimize — per
+    docs/convexity-engine.md §3, not to Phase 2 Expand."""
+
+    def test_fords_pwev_matches_validated_reference(self):
+        """Fords fixture: engine PWEV must match the committed reference
+        (20% worst / 55% base / 25% Phase 1 = $710,287)."""
+        with open(FIXTURES / "fords_34554176.json") as f:
+            data = json.load(f)
+
+        result = from_json(data)
+        reference = data["valuations"]["probability_weighted_ev"]["pwev"]
+
+        assert result.pwev.pwev == pytest.approx(reference, rel=0.001)
+
+    def test_phase1_gets_best_weight_not_phase2(self):
+        """Phase 1 Optimize carries the 'best' probability; Phase 2 Expand
+        stays at 0 for PWEV (it still drives divergence upside)."""
+        with open(FIXTURES / "fords_34554176.json") as f:
+            data = json.load(f)
+
+        result = from_json(data)
+        probs = {s.name: s.probability for s in result.deal.scenarios}
+
+        assert probs["Phase 1 Optimize"] == pytest.approx(0.25)
+        assert probs["Phase 2 Expand"] == 0.0
+        # Divergence must still use maximum upside (Phase 2 Expand value)
+        assert result.divergence.best_scenario_value == data["scenarios"]["Phase 2 Expand"]["value"]

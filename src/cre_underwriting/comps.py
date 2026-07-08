@@ -14,6 +14,7 @@ Usage:
 from __future__ import annotations
 
 import logging
+import os
 import re
 import time
 from dataclasses import asdict
@@ -424,21 +425,29 @@ def _njactb_comps(address: str, property_type: Optional[str] = None) -> list[Com
 # ── Main API ─────────────────────────────────────────────────
 
 def find_comps(address: str, property_type: Optional[str] = None,
-               radius_miles: float = 2.0) -> dict:
+               radius_miles: float = 2.0, live: bool = True) -> dict:
     """Find comparable sales for a CRE property.
 
     Primary source: LoopNet via Firefox BiDi (scrapes active for-sale listings
     in the same city to establish market price/SF benchmarks).
 
+    Pass live=False (or set CRE_OFFLINE=1 in the environment) to skip the
+    live LoopNet/Firefox path entirely — no browser launch, no network.
+    Used by tests and CI so the suite is hermetic and deterministic.
+
     Returns dict with 'comps' (list[Comp]) and 'summary' (aggregated stats).
     """
     all_comps: list[Comp] = []
+    offline = (not live) or os.environ.get("CRE_OFFLINE", "") == "1"
 
-    # Primary: LoopNet Firefox BiDi
-    try:
-        all_comps.extend(_loopnet_comps(address, property_type))
-    except Exception as exc:
-        logger.warning("LoopNet comps failed: %s", exc)
+    # Primary: LoopNet Firefox BiDi (skipped in offline mode)
+    if offline:
+        logger.info("Offline mode: skipping live LoopNet comps")
+    else:
+        try:
+            all_comps.extend(_loopnet_comps(address, property_type))
+        except Exception as exc:
+            logger.warning("LoopNet comps failed: %s", exc)
 
     # Fallback: NJ ACTB
     try:

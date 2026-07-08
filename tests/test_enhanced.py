@@ -166,3 +166,36 @@ class TestPricingSchemaOffers:
         moats = MoatScorer.score(boonton_deal)
         asset = next(d for d in moats.dimensions if d.name == "Asset Stack Coverage")
         assert asset.score > 0
+
+
+class TestNoSyntheticComps:
+    """Comps must never be fabricated from the subject's own ask price."""
+
+    def test_empty_comps_surface_as_explicit_gap(self):
+        """No comps data → empty comps list + unmissable warning, not
+        synthesized listings with invented addresses."""
+        with open(FIXTURES / "fords_34554176.json") as f:
+            deal = json.load(f)
+
+        result = EnhancedAnalyzer(deal).analyze()  # no comps_data passed
+        comps_ctx = result["comps"]
+
+        assert comps_ctx["comps"] == []
+        assert comps_ctx["comp_count"] == 0
+        assert "NO COMPS AVAILABLE" in comps_ctx.get("warning", "")
+
+    def test_real_comps_pass_through_without_warning(self):
+        with open(FIXTURES / "fords_34554176.json") as f:
+            deal = json.load(f)
+        comps_data = {
+            "comps": [{"address": "1 Real St, Fords, NJ", "sale_price": 700000,
+                       "sf": 3500, "price_per_sf": 200.0, "source": "loopnet"}],
+            "summary": {"count": 1, "price_per_sf_range": (200.0, 200.0)},
+        }
+
+        result = EnhancedAnalyzer(deal, comps_data=comps_data).analyze()
+        comps_ctx = result["comps"]
+
+        assert len(comps_ctx["comps"]) == 1
+        assert comps_ctx["comp_count"] == 1
+        assert "warning" not in comps_ctx

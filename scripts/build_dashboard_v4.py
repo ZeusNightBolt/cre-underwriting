@@ -473,7 +473,7 @@ def build_offers(D):
         cls = ' class="ot"' if is_tgt else ' class="oc"'
         rows += f"""<div{cls}>
   <div class="oo"><span class="ol">{sf(o.get('label',''))}</span><span class="op">{fm(o.get('price',0))}</span></div>
-  <div class="om"><span>${o.get('price_per_sf',0):.0f}/SF</span><span>Cap {pct(o.get('cap_rate_pct',0),0)}%</span><span>CoC {pct(o.get('cash_on_cash_pct',0),0)}%</span><span>GRM {o.get('gross_rent_multiplier',0):.1f}×</span></div>
+  <div class="om"><span>${o.get('price_per_sf',0):.0f}/SF</span><span>Cap {pct(o.get('cap_rate_pct',0),0)}%</span><span>GRM {o.get('gross_rent_multiplier',0):.1f}×</span></div>
   <div class="ow">{sf(o.get('label',''))}</div>
 </div>"""
     return rows

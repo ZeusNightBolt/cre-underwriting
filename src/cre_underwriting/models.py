@@ -250,12 +250,17 @@ class MoatScorecard:
 
 @dataclass
 class OfferPoint:
-    """A single price point in the offer ladder."""
+    """A single price point in the offer ladder.
+
+    Note: cash_on_cash_pct was removed — it was computed identically to
+    cap_rate_pct (NOI/price), i.e. a mislabeled duplicate. True cash-on-cash
+    requires financing parameters (LTV, rate, amortization) that the deal
+    schema does not carry.
+    """
     price: float
     price_per_sf: float
     cap_rate_pct: float
     gross_rent_multiplier: float
-    cash_on_cash_pct: float
     label: str = ""
 
 
@@ -275,7 +280,6 @@ class OfferLadder:
                 {"price": p.price, "price_per_sf": round(p.price_per_sf, 0),
                  "cap_rate_pct": round(p.cap_rate_pct, 2),
                  "gross_rent_multiplier": round(p.gross_rent_multiplier, 1),
-                 "cash_on_cash_pct": round(p.cash_on_cash_pct, 1),
                  "label": p.label}
                 for p in self.points
             ],
