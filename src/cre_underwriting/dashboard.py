@@ -1087,7 +1087,12 @@ def _build_recommendation(data, verdict):
 
     # Key conditions
     rec = data.get("recommendation", {})
-    conditions = rec.get("key_conditions", data.get("verdict", {}).get("key_conditions", []))
+    # verdict may be a string (fixture-style) rather than a dict; only pull
+    # structured key_conditions when it is actually a mapping, otherwise
+    # degrade gracefully to no structured conditions instead of crashing.
+    verdict_data = data.get("verdict", {})
+    verdict_conditions = verdict_data.get("key_conditions", []) if isinstance(verdict_data, dict) else []
+    conditions = rec.get("key_conditions", verdict_conditions)
     if conditions:
         parts.append('<div class="section-label">Key Conditions</div>')
         for c in conditions:
