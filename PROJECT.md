@@ -10,7 +10,7 @@ tags: [cre, underwriting, loopnet, convexity, dashboard, nj, pa, tier-2, tier-3]
 # CRE Underwriting v3
 
 **Status:** active
-**Package:** `cre-underwriting` (pip-installable, GitHub: ZeusNightBolt/cre-underwriting)
+**Package:** `cre-underwriting` (pip-installable, GitHub: girnarholdings/cre-underwriting)
 **Markets:** NJ/PA/Tier-3 under $2M
 **Skill:** Consolidated `cre-underwriting` v3 (8-pillar framework: scrape → parse → underwrite → comps → environmental → dashboard → deploy → verify)
 

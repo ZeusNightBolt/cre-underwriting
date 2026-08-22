@@ -3,7 +3,7 @@
 ## 5-Minute Setup
 
 ```bash
-git clone https://github.com/ZeusNightBolt/cre-underwriting.git
+git clone https://github.com/girnarholdings/cre-underwriting.git
 cd cre-underwriting
 pip install -e ".[all]"
 ```
